@@ -49,11 +49,6 @@ static void test_bad_args(void) {
     if (!json_string_setn(txt, NULL, 0))
         fail("json_string_setn with NULL value did not return error");
 
-    if (num->refcount != 1)
-        fail("unexpected reference count for num");
-    if (txt->refcount != 1)
-        fail("unexpected reference count for txt");
-
     json_decref(num);
     json_decref(txt);
 }
@@ -61,6 +56,9 @@ static void test_bad_args(void) {
 /* Call the simple functions not covered by other tests of the public API */
 static void run_tests() {
     json_t *value;
+    alloc_tracker_t tracker;
+
+    alloc_tracker_begin(&tracker);
 
     value = json_boolean(1);
     if (!json_is_true(value))
@@ -239,36 +237,36 @@ static void run_tests() {
         fail("json_null failed");
     json_decref(value);
 
-    /* Test reference counting on singletons (true, false, null) */
+    /* Test singleton stability through the public API */
     value = json_true();
-    if (value->refcount != (size_t)-1)
-        fail("refcounting true works incorrectly");
     json_decref(value);
-    if (value->refcount != (size_t)-1)
-        fail("refcounting true works incorrectly");
-    json_incref(value);
-    if (value->refcount != (size_t)-1)
-        fail("refcounting true works incorrectly");
+    if (json_true() != value)
+        fail("json_true changed identity after json_decref");
+    if (json_incref(value) != value)
+        fail("json_incref(json_true()) returned the wrong value");
+    json_decref(value);
+    if (json_true() != value)
+        fail("json_true changed identity after json_incref");
 
     value = json_false();
-    if (value->refcount != (size_t)-1)
-        fail("refcounting false works incorrectly");
     json_decref(value);
-    if (value->refcount != (size_t)-1)
-        fail("refcounting false works incorrectly");
-    json_incref(value);
-    if (value->refcount != (size_t)-1)
-        fail("refcounting false works incorrectly");
+    if (json_false() != value)
+        fail("json_false changed identity after json_decref");
+    if (json_incref(value) != value)
+        fail("json_incref(json_false()) returned the wrong value");
+    json_decref(value);
+    if (json_false() != value)
+        fail("json_false changed identity after json_incref");
 
     value = json_null();
-    if (value->refcount != (size_t)-1)
-        fail("refcounting null works incorrectly");
     json_decref(value);
-    if (value->refcount != (size_t)-1)
-        fail("refcounting null works incorrectly");
-    json_incref(value);
-    if (value->refcount != (size_t)-1)
-        fail("refcounting null works incorrectly");
+    if (json_null() != value)
+        fail("json_null changed identity after json_decref");
+    if (json_incref(value) != value)
+        fail("json_incref(json_null()) returned the wrong value");
+    json_decref(value);
+    if (json_null() != value)
+        fail("json_null changed identity after json_incref");
 
 #ifdef json_auto_t
     value = json_string("foo");
@@ -278,10 +276,11 @@ static void run_tests() {
         if (!json_is_string(test))
             fail("value type check failed");
     }
-    if (value->refcount != 1)
-        fail("automatic decrement failed");
     json_decref(value);
 #endif
 
     test_bad_args();
+
+    alloc_tracker_check(&tracker);
+    alloc_tracker_end(&tracker);
 }

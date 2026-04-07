@@ -64,9 +64,6 @@ static void test_bad_args(void) {
     if (json_number_value(txt) != 0.0)
         fail("json_number_value did not return 0.0 for non-numeric");
 
-    if (txt->refcount != 1)
-        fail("unexpected reference count for txt");
-
     json_decref(txt);
 }
 
@@ -74,6 +71,9 @@ static void run_tests() {
     json_t *integer, *real;
     json_int_t i;
     double d;
+    alloc_tracker_t tracker;
+
+    alloc_tracker_begin(&tracker);
 
     integer = json_integer(5);
     real = json_real(100.1);
@@ -120,4 +120,7 @@ static void run_tests() {
     test_inifity();
 #endif
     test_bad_args();
+
+    alloc_tracker_check(&tracker);
+    alloc_tracker_end(&tracker);
 }

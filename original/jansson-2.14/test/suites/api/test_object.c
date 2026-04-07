@@ -644,9 +644,15 @@ static void test_object_foreach_safe() {
 }
 
 static void test_bad_args(void) {
-    json_t *obj = json_object();
-    json_t *num = json_integer(1);
+    json_t *obj;
+    json_t *num;
     void *iter;
+    alloc_tracker_t tracker;
+
+    alloc_tracker_begin(&tracker);
+
+    obj = json_object();
+    num = json_integer(1);
 
     if (!obj || !num)
         fail("failed to allocate test objects");
@@ -770,14 +776,11 @@ static void test_bad_args(void) {
     if (!json_object_iter_set_new(obj, iter, NULL))
         fail("json_object_iter_set_new with NULL value did not return error");
 
-    if (obj->refcount != 1)
-        fail("unexpected reference count for obj");
-
-    if (num->refcount != 1)
-        fail("unexpected reference count for num");
-
     json_decref(obj);
     json_decref(num);
+
+    alloc_tracker_check(&tracker);
+    alloc_tracker_end(&tracker);
 }
 
 static void run_tests() {

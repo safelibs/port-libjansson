@@ -8,15 +8,9 @@
 #ifndef UTIL_H
 #define UTIL_H
 
-#ifdef HAVE_CONFIG_H
-#include <jansson_private_config.h>
-#endif
-
+#include <locale.h>
 #include <stdio.h>
 #include <stdlib.h>
-#if HAVE_LOCALE_H
-#include <locale.h>
-#endif
 
 #include <jansson.h>
 
@@ -27,6 +21,84 @@
         failhdr;                                                                         \
         fprintf(stderr, "%s\n", msg);                                                    \
         exit(1);                                                                         \
+    } while (0)
+
+typedef struct alloc_tracker_t {
+    json_malloc_t malloc_fn;
+    json_free_t free_fn;
+    size_t allocations;
+    size_t frees;
+} alloc_tracker_t;
+
+static alloc_tracker_t *active_alloc_tracker = NULL;
+
+static JANSSON_ATTRS((unused)) void *tracking_malloc(size_t size) {
+    alloc_tracker_t *tracker = active_alloc_tracker;
+    void *ptr;
+
+    if (!tracker)
+        fail("tracking_malloc called without an active tracker");
+
+    ptr = tracker->malloc_fn(size);
+    if (ptr)
+        tracker->allocations++;
+
+    return ptr;
+}
+
+static JANSSON_ATTRS((unused)) void tracking_free(void *ptr) {
+    alloc_tracker_t *tracker = active_alloc_tracker;
+
+    if (!tracker)
+        fail("tracking_free called without an active tracker");
+
+    if (ptr)
+        tracker->frees++;
+
+    tracker->free_fn(ptr);
+}
+
+static JANSSON_ATTRS((unused)) void alloc_tracker_begin(alloc_tracker_t *tracker) {
+    if (!tracker)
+        fail("alloc_tracker_begin called with NULL tracker");
+    if (active_alloc_tracker)
+        fail("allocation tracking is already active");
+
+    tracker->allocations = 0;
+    tracker->frees = 0;
+    json_get_alloc_funcs(&tracker->malloc_fn, &tracker->free_fn);
+    active_alloc_tracker = tracker;
+    json_set_alloc_funcs(tracking_malloc, tracking_free);
+}
+
+static JANSSON_ATTRS((unused)) void alloc_tracker_check(alloc_tracker_t *tracker) {
+    if (tracker->allocations != tracker->frees) {
+        failhdr;
+        fprintf(stderr, "leaked Jansson allocations: %zu allocation(s), %zu free(s)\n",
+                tracker->allocations, tracker->frees);
+        exit(1);
+    }
+}
+
+static JANSSON_ATTRS((unused)) void alloc_tracker_end(alloc_tracker_t *tracker) {
+    if (!tracker)
+        fail("alloc_tracker_end called with NULL tracker");
+    if (active_alloc_tracker != tracker)
+        fail("allocation tracking state mismatch");
+
+    json_set_alloc_funcs(tracker->malloc_fn, tracker->free_fn);
+    active_alloc_tracker = NULL;
+}
+
+#define assert_no_alloc_leaks(code)                                                      \
+    do {                                                                                 \
+        alloc_tracker_t tracker_;                                                        \
+        alloc_tracker_begin(&tracker_);                                                  \
+        do {                                                                             \
+            code                                                                         \
+        } while (0);                                                                     \
+        alloc_tracker_check(&tracker_);                                                  \
+        alloc_tracker_end(&tracker_);                                                    \
     } while (0)
 
 /* Assumes json_error_t error */
@@ -83,9 +155,7 @@
 static void run_tests();
 
 int main() {
-#ifdef HAVE_SETLOCALE
     setlocale(LC_ALL, "");
-#endif
     run_tests();
     return 0;
 }

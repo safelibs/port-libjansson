@@ -5,19 +5,12 @@
  * it under the terms of the MIT license. See LICENSE for details.
  */
 
-#ifdef HAVE_CONFIG_H
-#include <jansson_private_config.h>
-#endif
-
 #include <ctype.h>
 #include <jansson.h>
+#include <locale.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#ifdef HAVE_LOCALE_H
-#include <locale.h>
-#endif
 
 #if _WIN32
 #include <fcntl.h> /* for _O_BINARY */
@@ -333,9 +326,7 @@ int main(int argc, char *argv[]) {
     int i;
     char *test_path = NULL;
 
-#ifdef HAVE_SETLOCALE
     setlocale(LC_ALL, "");
-#endif
 
     if (argc < 2) {
         goto usage;

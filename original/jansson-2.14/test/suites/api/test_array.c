@@ -463,22 +463,19 @@ static void test_bad_args(void) {
         fail("json_array_extend did not return error for second argument "
              "non-array");
 
-    if (num->refcount != 1)
-        fail("unexpected reference count on num");
-    if (arr->refcount != 1)
-        fail("unexpected reference count on arr");
-
     json_decref(num);
     json_decref(arr);
 }
 
 static void run_tests() {
-    test_misc();
-    test_insert();
-    test_remove();
-    test_clear();
-    test_extend();
-    test_circular();
-    test_array_foreach();
-    test_bad_args();
+    assert_no_alloc_leaks(
+        test_misc();
+        test_insert();
+        test_remove();
+        test_clear();
+        test_extend();
+        test_circular();
+        test_array_foreach();
+        test_bad_args();
+    );
 }

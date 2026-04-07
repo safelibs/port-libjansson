@@ -50,8 +50,6 @@ static void test_copy_simple(void) {
         fail("copying a string doesn't copy");
     if (!json_equal(copy, value))
         fail("copying a string produces an inequal copy");
-    if (value->refcount != 1 || copy->refcount != 1)
-        fail("invalid refcounts");
     json_decref(value);
     json_decref(copy);
 
@@ -66,8 +64,6 @@ static void test_copy_simple(void) {
         fail("copying an integer doesn't copy");
     if (!json_equal(copy, value))
         fail("copying an integer produces an inequal copy");
-    if (value->refcount != 1 || copy->refcount != 1)
-        fail("invalid refcounts");
     json_decref(value);
     json_decref(copy);
 
@@ -82,8 +78,6 @@ static void test_copy_simple(void) {
         fail("copying a real doesn't copy");
     if (!json_equal(copy, value))
         fail("copying a real produces an inequal copy");
-    if (value->refcount != 1 || copy->refcount != 1)
-        fail("invalid refcounts");
     json_decref(value);
     json_decref(copy);
 }
@@ -129,8 +123,6 @@ static void test_deep_copy_simple(void) {
         fail("deep copying a string doesn't copy");
     if (!json_equal(copy, value))
         fail("deep copying a string produces an inequal copy");
-    if (value->refcount != 1 || copy->refcount != 1)
-        fail("invalid refcounts");
     json_decref(value);
     json_decref(copy);
 
@@ -145,8 +137,6 @@ static void test_deep_copy_simple(void) {
         fail("deep copying an integer doesn't copy");
     if (!json_equal(copy, value))
         fail("deep copying an integer produces an inequal copy");
-    if (value->refcount != 1 || copy->refcount != 1)
-        fail("invalid refcounts");
     json_decref(value);
     json_decref(copy);
 
@@ -161,8 +151,6 @@ static void test_deep_copy_simple(void) {
         fail("deep copying a real doesn't copy");
     if (!json_equal(copy, value))
         fail("deep copying a real produces an inequal copy");
-    if (value->refcount != 1 || copy->refcount != 1)
-        fail("invalid refcounts");
     json_decref(value);
     json_decref(copy);
 }
@@ -365,11 +353,13 @@ static void test_deep_copy_circular_references(void) {
 }
 
 static void run_tests() {
-    test_copy_simple();
-    test_deep_copy_simple();
-    test_copy_array();
-    test_deep_copy_array();
-    test_copy_object();
-    test_deep_copy_object();
-    test_deep_copy_circular_references();
+    assert_no_alloc_leaks(
+        test_copy_simple();
+        test_deep_copy_simple();
+        test_copy_array();
+        test_deep_copy_array();
+        test_copy_object();
+        test_deep_copy_object();
+        test_deep_copy_circular_references();
+    );
 }

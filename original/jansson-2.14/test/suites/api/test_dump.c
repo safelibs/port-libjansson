@@ -5,11 +5,10 @@
  * it under the terms of the MIT license. See LICENSE for details.
  */
 
-#include "jansson_private_config.h"
-
 #include <jansson.h>
 #include <string.h>
-#ifdef HAVE_UNISTD_H
+#if !defined(_WIN32) || defined(__MINGW32__)
+#define JANSSON_TEST_HAVE_UNISTD 1
 #include <unistd.h>
 #endif
 #include "util.h"
@@ -35,7 +34,7 @@ static void encode_null() {
     if (json_dumpf(NULL, stderr, JSON_ENCODE_ANY) != -1)
         fail("json_dumpf didn't fail for NULL");
 
-#ifdef HAVE_UNISTD_H
+#ifdef JANSSON_TEST_HAVE_UNISTD
     if (json_dumpfd(NULL, STDERR_FILENO, JSON_ENCODE_ANY) != -1)
         fail("json_dumpfd didn't fail for NULL");
 #endif
@@ -244,7 +243,7 @@ static void dumpb() {
 }
 
 static void dumpfd() {
-#ifdef HAVE_UNISTD_H
+#ifdef JANSSON_TEST_HAVE_UNISTD
     int fds[2] = {-1, -1};
     json_t *a, *b;
 

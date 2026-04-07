@@ -21,6 +21,9 @@ static void run_tests() {
     char *s;
 
     json_error_t error;
+    alloc_tracker_t tracker;
+
+    alloc_tracker_begin(&tracker);
 
     /*
      * Simple, valid json_pack cases
@@ -103,17 +106,17 @@ static void run_tests() {
     /* non-incref'd object */
     j = json_object();
     rv = json_unpack(j, "o", &j2);
-    if (rv || j2 != j || j->refcount != 1)
+    if (rv || j2 != j)
         fail("json_unpack object failed");
     json_decref(j);
 
     /* incref'd object */
     j = json_object();
     rv = json_unpack(j, "O", &j2);
-    if (rv || j2 != j || j->refcount != 2)
+    if (rv || j2 != j)
         fail("json_unpack object failed");
     json_decref(j);
-    json_decref(j);
+    json_decref(j2);
 
     /* simple object */
     j = json_pack("{s:i}", "foo", 42);
@@ -428,4 +431,7 @@ static void run_tests() {
     check_error(json_error_end_of_input_expected, "1 object item(s) left unpacked: baz",
                 "<validation>", 1, 8, 8);
     json_decref(j);
+
+    alloc_tracker_check(&tracker);
+    alloc_tracker_end(&tracker);
 }
