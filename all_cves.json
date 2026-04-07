@@ -1,0 +1,2357 @@
+{
+  "project": {
+    "package_name": "libjansson",
+    "upstream_name": "Jansson",
+    "upstream_repository": "https://github.com/akheron/jansson"
+  },
+  "generated_at_utc": "2026-04-07T07:48:52Z",
+  "as_of_date": "2026-04-07",
+  "scope": {
+    "included_records": "Upstream Jansson/libjansson CVEs identified from NVD upstream CPE matches and corroborated with CVE.org, Debian, Ubuntu, and upstream GitHub context.",
+    "excluded_records": "Related libjansson-name records that NVD states do not affect upstream Jansson are retained separately for auditability."
+  },
+  "discovery": {
+    "nvd_virtual_match_query": {
+      "url": "https://services.nvd.nist.gov/rest/json/cves/2.0?virtualMatchString=cpe:2.3:a:jansson_project:jansson:*:*:*:*:*:*:*:*",
+      "returned_cve_ids": [
+        "CVE-2013-6401",
+        "CVE-2016-4425",
+        "CVE-2020-36325"
+      ]
+    },
+    "nvd_keyword_queries": [
+      {
+        "url": "https://services.nvd.nist.gov/rest/json/cves/2.0?keywordSearch=jansson",
+        "returned_cve_ids": [
+          "CVE-2013-6401",
+          "CVE-2016-4425",
+          "CVE-2020-36325"
+        ]
+      },
+      {
+        "url": "https://services.nvd.nist.gov/rest/json/cves/2.0?keywordSearch=libjansson",
+        "returned_cve_ids": [
+          "CVE-2024-39349"
+        ]
+      }
+    ],
+    "debian_source_package_page": {
+      "url": "https://security-tracker.debian.org/tracker/source-package/jansson",
+      "text": "Information on source package jansson     Information on source package jansson     jansson in the Package Tracking System    jansson in the Bug Tracking System    jansson source code    jansson in the testing migration checker    Available versions    Release  Version    bullseye  2.13.1-1.1    bookworm  2.14-2    trixie  2.14-2    forky  2.14-2    sid  2.14-2    Open unimportant issues    Bug  bullseye  bookworm  trixie  forky  sid  Description     CVE-2020-36325    vulnerable    vulnerable    vulnerable    vulnerable    vulnerable   An issue was discovered in Jansson through 2.13.1. Due to a parsing er ...    Resolved issues    Bug  Description     CVE-2016-4425   Jansson 2.7 and earlier allows context-dependent attackers to cause a  ...     CVE-2013-6401   Jansson, possibly 2.4 and earlier, does not restrict the ability to tr ...    Security announcements    DSA / DLA  Description     DSA-3577-1   jansson - security update     DLA-471-1   jansson - security update     Search for package or bug name:     Reporting problems     Home  -  Debian Security  -  Source   (Git)"
+    }
+  },
+  "included_cves": [
+    {
+      "id": "CVE-2013-6401",
+      "summary": "Jansson, possibly 2.4 and earlier, does not restrict the ability to trigger hash collisions predictably, which allows context-dependent attackers to cause a denial of service (CPU consumption) via a crafted JSON document.",
+      "current_state": {
+        "mitre_state": "PUBLISHED",
+        "nvd_vuln_status": "Deferred",
+        "disputed": false
+      },
+      "affected_versions": {
+        "nvd_configurations": [
+          {
+            "nodes": [
+              {
+                "operator": "OR",
+                "negate": false,
+                "cpeMatch": [
+                  {
+                    "vulnerable": true,
+                    "criteria": "cpe:2.3:a:jansson_project:jansson:*:*:*:*:*:*:*:*",
+                    "versionEndIncluding": "2.4",
+                    "matchCriteriaId": "022888A4-6012-4564-B3F4-BDA2DA4CE84F"
+                  },
+                  {
+                    "vulnerable": true,
+                    "criteria": "cpe:2.3:a:jansson_project:jansson:2.0:*:*:*:*:*:*:*",
+                    "matchCriteriaId": "45406101-3C11-4CEE-83FA-8831CEFCEA23"
+                  },
+                  {
+                    "vulnerable": true,
+                    "criteria": "cpe:2.3:a:jansson_project:jansson:2.0.1:*:*:*:*:*:*:*",
+                    "matchCriteriaId": "6184FE2F-1772-4F59-964C-94EE19459FCE"
+                  },
+                  {
+                    "vulnerable": true,
+                    "criteria": "cpe:2.3:a:jansson_project:jansson:2.1:*:*:*:*:*:*:*",
+                    "matchCriteriaId": "F36E0035-1F30-4D27-B73E-C46D5156C069"
+                  },
+                  {
+                    "vulnerable": true,
+                    "criteria": "cpe:2.3:a:jansson_project:jansson:2.2:*:*:*:*:*:*:*",
+                    "matchCriteriaId": "72C31418-B802-4598-9FAD-67C8A287121C"
+                  },
+                  {
+                    "vulnerable": true,
+                    "criteria": "cpe:2.3:a:jansson_project:jansson:2.2.1:*:*:*:*:*:*:*",
+                    "matchCriteriaId": "D29BEA76-DCAF-46F4-9520-D983CA9EF8DF"
+                  },
+                  {
+                    "vulnerable": true,
+                    "criteria": "cpe:2.3:a:jansson_project:jansson:2.3:*:*:*:*:*:*:*",
+                    "matchCriteriaId": "8A389815-0428-4267-AAFC-2B57AAA314CD"
+                  },
+                  {
+                    "vulnerable": true,
+                    "criteria": "cpe:2.3:a:jansson_project:jansson:2.3.1:*:*:*:*:*:*:*",
+                    "matchCriteriaId": "A3AFCF62-51BD-467D-B614-2F3198EB310A"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "mitre_affected": [
+          {
+            "product": "n/a",
+            "vendor": "n/a",
+            "versions": [
+              {
+                "status": "affected",
+                "version": "n/a"
+              }
+            ]
+          }
+        ]
+      },
+      "source_texts": [
+        {
+          "source": "nvd_description",
+          "url": "https://nvd.nist.gov/vuln/detail/CVE-2013-6401",
+          "text": "Jansson, possibly 2.4 and earlier, does not restrict the ability to trigger hash collisions predictably, which allows context-dependent attackers to cause a denial of service (CPU consumption) via a crafted JSON document."
+        },
+        {
+          "source": "mitre_description",
+          "url": "https://www.cve.org/CVERecord?id=CVE-2013-6401",
+          "text": "Jansson, possibly 2.4 and earlier, does not restrict the ability to trigger hash collisions predictably, which allows context-dependent attackers to cause a denial of service (CPU consumption) via a crafted JSON document."
+        },
+        {
+          "source": "debian_tracker_page",
+          "url": "https://security-tracker.debian.org/tracker/CVE-2013-6401",
+          "text": "CVE-2013-6401     CVE-2013-6401      Name   CVE-2013-6401     Description   Jansson, possibly 2.4 and earlier, does not restrict the ability to trigger hash collisions predictably, which allows context-dependent attackers to cause a denial of service (CPU consumption) via a crafted JSON document.     Source    CVE  (at  NVD ;  CERT ,  ENISA ,  LWN ,  oss-sec ,  fulldisc ,  Debian ELTS ,  Red Hat ,  Ubuntu ,  Gentoo , SUSE  bugzilla / CVE , GitHub  advisories / code / issues ,  web search ,  more )     Debian Bugs    738647     Vulnerable and fixed packages  The table below lists information on source packages.    Source Package  Release  Version  Status     jansson  ( PTS )  bullseye  2.13.1-1.1  fixed      forky, sid, bookworm, trixie  2.14-2  fixed    The information below is based on the following data on fixed versions.    Package  Type  Release  Fixed Version  Urgency  Origin  Debian Bugs     jansson   source  (unstable)  2.6-1       738647     Notes   [wheezy] - jansson <no-dsa> (Minor issue)     Search for package or bug name:     Reporting problems     Home  -  Debian Security  -  Source   (Git)"
+        },
+        {
+          "source": "ubuntu_security_tracker",
+          "url": "https://ubuntu.com/security/CVE-2013-6401",
+          "text": "Ubuntu CVE status: active\nDescription:\nJansson, possibly 2.4 and earlier, does not restrict the ability to trigger\nhash collisions predictably, which allows context-dependent attackers to\ncause a denial of service (CPU consumption) via a crafted JSON document.\n\nPer-release statuses:\n- precise: ignored end of life\n- artful: not-affected 2.6-1\n- bionic: not-affected 2.6-1\n- lucid: DNE\n- quantal: ignored end of life\n- saucy: ignored end of life\n- trusty: released 2.5-2ubuntu0.1\n- upstream: released 2.6-1\n- utopic: not-affected 2.6-1\n- vivid: not-affected 2.6-1\n- wily: not-affected 2.6-1\n- xenial: not-affected 2.6-1\n- yakkety: not-affected 2.6-1\n- zesty: not-affected 2.6-1"
+        },
+        {
+          "source": "github_fix_commit",
+          "url": "https://github.com/akheron/jansson/commit/8f80c2d83808150724d31793e6ade92749b1faa4",
+          "text": "Commit: 8f80c2d83808150724d31793e6ade92749b1faa4\nURL: https://github.com/akheron/jansson/commit/8f80c2d83808150724d31793e6ade92749b1faa4\nAuthor date: 2014-01-14T09:16:39Z\nCommitter date: 2014-02-11T06:41:30Z\n\nCVE-2013-6401: Change hash function, randomize hashes\n\nThanks to Florian Weimer and Eric Sesterhenn for reporting, reviewing\nand testing.\n\nChanged files:\n- CMakeLists.txt (modified, +39/-10)\n- cmake/config.h.cmake (modified, +25/-21)\n- configure.ac (modified, +48/-2)\n- src/Makefile.am (modified, +1/-0)\n- src/hashtable.c (modified, +26/-41)\n- src/hashtable.h (modified, +2/-1)\n- src/hashtable_seed.c (added, +278/-0)\n- src/jansson.def (modified, +1/-0)\n- src/jansson.h (modified, +1/-0)\n- src/lookup3.h (added, +366/-0)\n- src/utf.h (modified, +4/-16)\n- src/value.c (modified, +16/-0)\n- test/bin/json_process.c (modified, +15/-1)\n- test/suites/api/test_memory_funcs.c (modified, +3/-3)\n- test/suites/api/test_object.c (modified, +40/-24)\n- test/suites/encoding-flags/compact-object/env (modified, +2/-1)\n- test/suites/encoding-flags/indent-compact-object/env (modified, +2/-1)\n- test/suites/encoding-flags/indent-object/env (modified, +2/-1)\n- test/suites/encoding-flags/object/env (added, +2/-0)"
+        },
+        {
+          "source": "local_upstream_changes",
+          "path": "/home/yans/code/safelibs/ported/libjansson/original/jansson-2.14/CHANGES",
+          "line_start": 404,
+          "line_end": 414,
+          "text": "Version 2.6\n===========\n\nReleased 2014-02-11\n\n* Security:\n\n  - CVE-2013-6401: The hash function used by the hashtable\n    implementation has been changed, and is automatically seeded with\n    random data when the first JSON object is created. This prevents\n    an attacker from causing large JSON objects with specially crafted"
+        },
+        {
+          "source": "local_debian_changelog",
+          "path": "/home/yans/code/safelibs/ported/libjansson/original/jansson-2.14/debian/changelog",
+          "line_start": 141,
+          "line_end": 148,
+          "text": "jansson (2.6-1) unstable; urgency=high\n\n  * New upstream release\n    - Fix hash function so that it is not susceptible to predictable hash\n      collisions as per CVE-2013-6401 (Closes: #738647)\n    - Set urgency=high accordingly\n  * Update symbols file"
+        }
+      ],
+      "raw_records": {
+        "nvd": {
+          "id": "CVE-2013-6401",
+          "sourceIdentifier": "secalert@redhat.com",
+          "published": "2014-03-21T01:04:00.623",
+          "lastModified": "2025-04-12T10:46:40.837",
+          "vulnStatus": "Deferred",
+          "cveTags": [],
+          "descriptions": [
+            {
+              "lang": "en",
+              "value": "Jansson, possibly 2.4 and earlier, does not restrict the ability to trigger hash collisions predictably, which allows context-dependent attackers to cause a denial of service (CPU consumption) via a crafted JSON document."
+            },
+            {
+              "lang": "es",
+              "value": "Jansson, posiblemente versi\u00f3n 2.4 y anteriores, no restringe la capacidad de desencadenar colisiones hash predeciblemente, lo que permite a los atacantes dependiendo del contexto causar una denegaci\u00f3n de servicio (consumo de CPU) por medio de un documento JSON dise\u00f1ado."
+            }
+          ],
+          "metrics": {
+            "cvssMetricV2": [
+              {
+                "source": "nvd@nist.gov",
+                "type": "Primary",
+                "cvssData": {
+                  "version": "2.0",
+                  "vectorString": "AV:N/AC:L/Au:N/C:N/I:N/A:P",
+                  "baseScore": 5.0,
+                  "accessVector": "NETWORK",
+                  "accessComplexity": "LOW",
+                  "authentication": "NONE",
+                  "confidentialityImpact": "NONE",
+                  "integrityImpact": "NONE",
+                  "availabilityImpact": "PARTIAL"
+                },
+                "baseSeverity": "MEDIUM",
+                "exploitabilityScore": 10.0,
+                "impactScore": 2.9,
+                "acInsufInfo": false,
+                "obtainAllPrivilege": false,
+                "obtainUserPrivilege": false,
+                "obtainOtherPrivilege": false,
+                "userInteractionRequired": false
+              }
+            ]
+          },
+          "weaknesses": [
+            {
+              "source": "nvd@nist.gov",
+              "type": "Primary",
+              "description": [
+                {
+                  "lang": "en",
+                  "value": "CWE-310"
+                }
+              ]
+            }
+          ],
+          "configurations": [
+            {
+              "nodes": [
+                {
+                  "operator": "OR",
+                  "negate": false,
+                  "cpeMatch": [
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:jansson_project:jansson:*:*:*:*:*:*:*:*",
+                      "versionEndIncluding": "2.4",
+                      "matchCriteriaId": "022888A4-6012-4564-B3F4-BDA2DA4CE84F"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:jansson_project:jansson:2.0:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "45406101-3C11-4CEE-83FA-8831CEFCEA23"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:jansson_project:jansson:2.0.1:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "6184FE2F-1772-4F59-964C-94EE19459FCE"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:jansson_project:jansson:2.1:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "F36E0035-1F30-4D27-B73E-C46D5156C069"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:jansson_project:jansson:2.2:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "72C31418-B802-4598-9FAD-67C8A287121C"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:jansson_project:jansson:2.2.1:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "D29BEA76-DCAF-46F4-9520-D983CA9EF8DF"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:jansson_project:jansson:2.3:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "8A389815-0428-4267-AAFC-2B57AAA314CD"
+                    },
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:jansson_project:jansson:2.3.1:*:*:*:*:*:*:*",
+                      "matchCriteriaId": "A3AFCF62-51BD-467D-B614-2F3198EB310A"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "references": [
+            {
+              "url": "http://comments.gmane.org/gmane.comp.security.oss.general/12099",
+              "source": "secalert@redhat.com"
+            },
+            {
+              "url": "http://lists.opensuse.org/opensuse-updates/2014-03/msg00057.html",
+              "source": "secalert@redhat.com"
+            },
+            {
+              "url": "https://bugzilla.redhat.com/show_bug.cgi?id=1035538",
+              "source": "secalert@redhat.com"
+            },
+            {
+              "url": "https://github.com/akheron/jansson/commit/8f80c2d83808150724d31793e6ade92749b1faa4",
+              "source": "secalert@redhat.com"
+            },
+            {
+              "url": "http://comments.gmane.org/gmane.comp.security.oss.general/12099",
+              "source": "af854a3a-2127-422b-91ae-364da2661108"
+            },
+            {
+              "url": "http://lists.opensuse.org/opensuse-updates/2014-03/msg00057.html",
+              "source": "af854a3a-2127-422b-91ae-364da2661108"
+            },
+            {
+              "url": "https://bugzilla.redhat.com/show_bug.cgi?id=1035538",
+              "source": "af854a3a-2127-422b-91ae-364da2661108"
+            },
+            {
+              "url": "https://github.com/akheron/jansson/commit/8f80c2d83808150724d31793e6ade92749b1faa4",
+              "source": "af854a3a-2127-422b-91ae-364da2661108"
+            }
+          ]
+        },
+        "mitre_cveawg": {
+          "containers": {
+            "cna": {
+              "affected": [
+                {
+                  "product": "n/a",
+                  "vendor": "n/a",
+                  "versions": [
+                    {
+                      "status": "affected",
+                      "version": "n/a"
+                    }
+                  ]
+                }
+              ],
+              "datePublic": "2014-01-14T00:00:00.000Z",
+              "descriptions": [
+                {
+                  "lang": "en",
+                  "value": "Jansson, possibly 2.4 and earlier, does not restrict the ability to trigger hash collisions predictably, which allows context-dependent attackers to cause a denial of service (CPU consumption) via a crafted JSON document."
+                }
+              ],
+              "problemTypes": [
+                {
+                  "descriptions": [
+                    {
+                      "description": "n/a",
+                      "lang": "en",
+                      "type": "text"
+                    }
+                  ]
+                }
+              ],
+              "providerMetadata": {
+                "dateUpdated": "2014-05-19T12:57:01.000Z",
+                "orgId": "53f830b8-0a3f-465b-8143-3b8a9948e749",
+                "shortName": "redhat"
+              },
+              "references": [
+                {
+                  "tags": [
+                    "x_refsource_CONFIRM"
+                  ],
+                  "url": "https://bugzilla.redhat.com/show_bug.cgi?id=1035538"
+                },
+                {
+                  "name": "openSUSE-SU-2014:0394",
+                  "tags": [
+                    "vendor-advisory",
+                    "x_refsource_SUSE"
+                  ],
+                  "url": "http://lists.opensuse.org/opensuse-updates/2014-03/msg00057.html"
+                },
+                {
+                  "tags": [
+                    "x_refsource_CONFIRM"
+                  ],
+                  "url": "https://github.com/akheron/jansson/commit/8f80c2d83808150724d31793e6ade92749b1faa4"
+                },
+                {
+                  "name": "[oss-security] 20140211 CVE-2013-6401 Jansson hash collision issue",
+                  "tags": [
+                    "mailing-list",
+                    "x_refsource_MLIST"
+                  ],
+                  "url": "http://comments.gmane.org/gmane.comp.security.oss.general/12099"
+                }
+              ]
+            },
+            "adp": [
+              {
+                "providerMetadata": {
+                  "orgId": "af854a3a-2127-422b-91ae-364da2661108",
+                  "shortName": "CVE",
+                  "dateUpdated": "2024-08-06T17:39:01.595Z"
+                },
+                "title": "CVE Program Container",
+                "references": [
+                  {
+                    "tags": [
+                      "x_refsource_CONFIRM",
+                      "x_transferred"
+                    ],
+                    "url": "https://bugzilla.redhat.com/show_bug.cgi?id=1035538"
+                  },
+                  {
+                    "name": "openSUSE-SU-2014:0394",
+                    "tags": [
+                      "vendor-advisory",
+                      "x_refsource_SUSE",
+                      "x_transferred"
+                    ],
+                    "url": "http://lists.opensuse.org/opensuse-updates/2014-03/msg00057.html"
+                  },
+                  {
+                    "tags": [
+                      "x_refsource_CONFIRM",
+                      "x_transferred"
+                    ],
+                    "url": "https://github.com/akheron/jansson/commit/8f80c2d83808150724d31793e6ade92749b1faa4"
+                  },
+                  {
+                    "name": "[oss-security] 20140211 CVE-2013-6401 Jansson hash collision issue",
+                    "tags": [
+                      "mailing-list",
+                      "x_refsource_MLIST",
+                      "x_transferred"
+                    ],
+                    "url": "http://comments.gmane.org/gmane.comp.security.oss.general/12099"
+                  }
+                ]
+              }
+            ]
+          },
+          "cveMetadata": {
+            "assignerOrgId": "53f830b8-0a3f-465b-8143-3b8a9948e749",
+            "assignerShortName": "redhat",
+            "cveId": "CVE-2013-6401",
+            "datePublished": "2014-03-20T18:00:00.000Z",
+            "dateReserved": "2013-11-04T00:00:00.000Z",
+            "dateUpdated": "2024-08-06T17:39:01.595Z",
+            "state": "PUBLISHED"
+          },
+          "dataType": "CVE_RECORD",
+          "dataVersion": "5.1"
+        },
+        "ubuntu_security": {
+          "id": "CVE-2013-6401",
+          "published": "2014-03-21T01:04:00",
+          "updated_at": "2024-07-24T15:57:39.284958+00:00",
+          "description": "\nJansson, possibly 2.4 and earlier, does not restrict the ability to trigger\nhash collisions predictably, which allows context-dependent attackers to\ncause a denial of service (CPU consumption) via a crafted JSON document.",
+          "ubuntu_description": "\nFlorian Weimer discovered that Jansson incorrectly handled hash\ncollisions predictability. An attacker could possibly use this issue to\ncause a denial of service.",
+          "notes": [],
+          "codename": null,
+          "priority": "medium",
+          "cvss3": null,
+          "impact": null,
+          "status": "active",
+          "mitigation": "",
+          "references": [
+            "http://www.openwall.com/lists/oss-security/2014/02/11/7",
+            "https://www.cve.org/CVERecord?id=CVE-2013-6401"
+          ],
+          "bugs": [
+            "http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=738647"
+          ],
+          "patches": {
+            "jansson": [
+              "upstream: https://github.com/akheron/jansson/commit/8f80c2d83808150724d31793e6ade92749b1faa4",
+              "upstream: https://github.com/akheron/jansson/commit/42016a35c8907e477be73b0b5d06cc09af231ee4"
+            ]
+          },
+          "tags": {},
+          "packages": [
+            {
+              "name": "jansson",
+              "source": "https://ubuntu.com/security/cve?package=jansson",
+              "ubuntu": "https://packages.ubuntu.com/search?suite=all&section=all&arch=any&searchon=sourcenames&keywords=jansson",
+              "debian": "https://tracker.debian.org/pkg/jansson",
+              "statuses": [
+                {
+                  "release_codename": "precise",
+                  "status": "ignored",
+                  "description": "end of life",
+                  "component": null,
+                  "pocket": "security"
+                },
+                {
+                  "release_codename": "artful",
+                  "status": "not-affected",
+                  "description": "2.6-1",
+                  "component": null,
+                  "pocket": "security"
+                },
+                {
+                  "release_codename": "bionic",
+                  "status": "not-affected",
+                  "description": "2.6-1",
+                  "component": null,
+                  "pocket": "security"
+                },
+                {
+                  "release_codename": "lucid",
+                  "status": "DNE",
+                  "description": "",
+                  "component": null,
+                  "pocket": "security"
+                },
+                {
+                  "release_codename": "quantal",
+                  "status": "ignored",
+                  "description": "end of life",
+                  "component": null,
+                  "pocket": "security"
+                },
+                {
+                  "release_codename": "saucy",
+                  "status": "ignored",
+                  "description": "end of life",
+                  "component": null,
+                  "pocket": "security"
+                },
+                {
+                  "release_codename": "trusty",
+                  "status": "released",
+                  "description": "2.5-2ubuntu0.1",
+                  "component": null,
+                  "pocket": "security"
+                },
+                {
+                  "release_codename": "upstream",
+                  "status": "released",
+                  "description": "2.6-1",
+                  "component": null,
+                  "pocket": "security"
+                },
+                {
+                  "release_codename": "utopic",
+                  "status": "not-affected",
+                  "description": "2.6-1",
+                  "component": null,
+                  "pocket": "security"
+                },
+                {
+                  "release_codename": "vivid",
+                  "status": "not-affected",
+                  "description": "2.6-1",
+                  "component": null,
+                  "pocket": "security"
+                },
+                {
+                  "release_codename": "wily",
+                  "status": "not-affected",
+                  "description": "2.6-1",
+                  "component": null,
+                  "pocket": "security"
+                },
+                {
+                  "release_codename": "xenial",
+                  "status": "not-affected",
+                  "description": "2.6-1",
+                  "component": null,
+                  "pocket": "security"
+                },
+                {
+                  "release_codename": "yakkety",
+                  "status": "not-affected",
+                  "description": "2.6-1",
+                  "component": null,
+                  "pocket": "security"
+                },
+                {
+                  "release_codename": "zesty",
+                  "status": "not-affected",
+                  "description": "2.6-1",
+                  "component": null,
+                  "pocket": "security"
+                }
+              ]
+            }
+          ],
+          "notices_ids": [],
+          "notices": []
+        },
+        "debian_tracker_page_text": "CVE-2013-6401     CVE-2013-6401      Name   CVE-2013-6401     Description   Jansson, possibly 2.4 and earlier, does not restrict the ability to trigger hash collisions predictably, which allows context-dependent attackers to cause a denial of service (CPU consumption) via a crafted JSON document.     Source    CVE  (at  NVD ;  CERT ,  ENISA ,  LWN ,  oss-sec ,  fulldisc ,  Debian ELTS ,  Red Hat ,  Ubuntu ,  Gentoo , SUSE  bugzilla / CVE , GitHub  advisories / code / issues ,  web search ,  more )     Debian Bugs    738647     Vulnerable and fixed packages  The table below lists information on source packages.    Source Package  Release  Version  Status     jansson  ( PTS )  bullseye  2.13.1-1.1  fixed      forky, sid, bookworm, trixie  2.14-2  fixed    The information below is based on the following data on fixed versions.    Package  Type  Release  Fixed Version  Urgency  Origin  Debian Bugs     jansson   source  (unstable)  2.6-1       738647     Notes   [wheezy] - jansson <no-dsa> (Minor issue)     Search for package or bug name:     Reporting problems     Home  -  Debian Security  -  Source   (Git)",
+        "github_issue": null,
+        "github_issue_comments": null,
+        "github_pull_request": null,
+        "github_fix_commit": {
+          "sha": "8f80c2d83808150724d31793e6ade92749b1faa4",
+          "html_url": "https://github.com/akheron/jansson/commit/8f80c2d83808150724d31793e6ade92749b1faa4",
+          "message": "CVE-2013-6401: Change hash function, randomize hashes\n\nThanks to Florian Weimer and Eric Sesterhenn for reporting, reviewing\nand testing.",
+          "author": {
+            "name": "Petri Lehtinen",
+            "email": "petri@digip.org",
+            "date": "2014-01-14T09:16:39Z"
+          },
+          "committer": {
+            "name": "Petri Lehtinen",
+            "email": "petri@digip.org",
+            "date": "2014-02-11T06:41:30Z"
+          },
+          "stats": {
+            "total": 995,
+            "additions": 873,
+            "deletions": 122
+          },
+          "files": [
+            {
+              "filename": "CMakeLists.txt",
+              "status": "modified",
+              "additions": 39,
+              "deletions": 10,
+              "changes": 49
+            },
+            {
+              "filename": "cmake/config.h.cmake",
+              "status": "modified",
+              "additions": 25,
+              "deletions": 21,
+              "changes": 46
+            },
+            {
+              "filename": "configure.ac",
+              "status": "modified",
+              "additions": 48,
+              "deletions": 2,
+              "changes": 50
+            },
+            {
+              "filename": "src/Makefile.am",
+              "status": "modified",
+              "additions": 1,
+              "deletions": 0,
+              "changes": 1
+            },
+            {
+              "filename": "src/hashtable.c",
+              "status": "modified",
+              "additions": 26,
+              "deletions": 41,
+              "changes": 67
+            },
+            {
+              "filename": "src/hashtable.h",
+              "status": "modified",
+              "additions": 2,
+              "deletions": 1,
+              "changes": 3
+            },
+            {
+              "filename": "src/hashtable_seed.c",
+              "status": "added",
+              "additions": 278,
+              "deletions": 0,
+              "changes": 278
+            },
+            {
+              "filename": "src/jansson.def",
+              "status": "modified",
+              "additions": 1,
+              "deletions": 0,
+              "changes": 1
+            },
+            {
+              "filename": "src/jansson.h",
+              "status": "modified",
+              "additions": 1,
+              "deletions": 0,
+              "changes": 1
+            },
+            {
+              "filename": "src/lookup3.h",
+              "status": "added",
+              "additions": 366,
+              "deletions": 0,
+              "changes": 366
+            },
+            {
+              "filename": "src/utf.h",
+              "status": "modified",
+              "additions": 4,
+              "deletions": 16,
+              "changes": 20
+            },
+            {
+              "filename": "src/value.c",
+              "status": "modified",
+              "additions": 16,
+              "deletions": 0,
+              "changes": 16
+            },
+            {
+              "filename": "test/bin/json_process.c",
+              "status": "modified",
+              "additions": 15,
+              "deletions": 1,
+              "changes": 16
+            },
+            {
+              "filename": "test/suites/api/test_memory_funcs.c",
+              "status": "modified",
+              "additions": 3,
+              "deletions": 3,
+              "changes": 6
+            },
+            {
+              "filename": "test/suites/api/test_object.c",
+              "status": "modified",
+              "additions": 40,
+              "deletions": 24,
+              "changes": 64
+            },
+            {
+              "filename": "test/suites/encoding-flags/compact-object/env",
+              "status": "modified",
+              "additions": 2,
+              "deletions": 1,
+              "changes": 3
+            },
+            {
+              "filename": "test/suites/encoding-flags/indent-compact-object/env",
+              "status": "modified",
+              "additions": 2,
+              "deletions": 1,
+              "changes": 3
+            },
+            {
+              "filename": "test/suites/encoding-flags/indent-object/env",
+              "status": "modified",
+              "additions": 2,
+              "deletions": 1,
+              "changes": 3
+            },
+            {
+              "filename": "test/suites/encoding-flags/object/env",
+              "status": "added",
+              "additions": 2,
+              "deletions": 0,
+              "changes": 2
+            }
+          ]
+        }
+      },
+      "references": [
+        "http://comments.gmane.org/gmane.comp.security.oss.general/12099",
+        "http://lists.opensuse.org/opensuse-updates/2014-03/msg00057.html",
+        "https://bugzilla.redhat.com/show_bug.cgi?id=1035538",
+        "https://github.com/akheron/jansson/commit/8f80c2d83808150724d31793e6ade92749b1faa4",
+        "https://security-tracker.debian.org/tracker/CVE-2013-6401",
+        "https://ubuntu.com/security/CVE-2013-6401"
+      ]
+    },
+    {
+      "id": "CVE-2016-4425",
+      "summary": "Jansson 2.7 and earlier allows context-dependent attackers to cause a denial of service (deep recursion, stack consumption, and crash) via crafted JSON data.",
+      "current_state": {
+        "mitre_state": "PUBLISHED",
+        "nvd_vuln_status": "Deferred",
+        "disputed": false
+      },
+      "affected_versions": {
+        "nvd_configurations": [
+          {
+            "nodes": [
+              {
+                "operator": "OR",
+                "negate": false,
+                "cpeMatch": [
+                  {
+                    "vulnerable": true,
+                    "criteria": "cpe:2.3:a:jansson_project:jansson:*:*:*:*:*:*:*:*",
+                    "versionEndIncluding": "2.7",
+                    "matchCriteriaId": "1D0F6F49-CF05-4F59-A732-6B983533749F"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "mitre_affected": [
+          {
+            "product": "n/a",
+            "vendor": "n/a",
+            "versions": [
+              {
+                "status": "affected",
+                "version": "n/a"
+              }
+            ]
+          }
+        ]
+      },
+      "source_texts": [
+        {
+          "source": "nvd_description",
+          "url": "https://nvd.nist.gov/vuln/detail/CVE-2016-4425",
+          "text": "Jansson 2.7 and earlier allows context-dependent attackers to cause a denial of service (deep recursion, stack consumption, and crash) via crafted JSON data."
+        },
+        {
+          "source": "mitre_description",
+          "url": "https://www.cve.org/CVERecord?id=CVE-2016-4425",
+          "text": "Jansson 2.7 and earlier allows context-dependent attackers to cause a denial of service (deep recursion, stack consumption, and crash) via crafted JSON data."
+        },
+        {
+          "source": "debian_tracker_page",
+          "url": "https://security-tracker.debian.org/tracker/CVE-2016-4425",
+          "text": "CVE-2016-4425     CVE-2016-4425      Name   CVE-2016-4425     Description   Jansson 2.7 and earlier allows context-dependent attackers to cause a denial of service (deep recursion, stack consumption, and crash) via crafted JSON data.     Source    CVE  (at  NVD ;  CERT ,  ENISA ,  LWN ,  oss-sec ,  fulldisc ,  Debian ELTS ,  Red Hat ,  Ubuntu ,  Gentoo , SUSE  bugzilla / CVE , GitHub  advisories / code / issues ,  web search ,  more )     References    DLA-471-1 ,  DSA-3577-1      Debian Bugs    823238     Vulnerable and fixed packages  The table below lists information on source packages.    Source Package  Release  Version  Status     jansson  ( PTS )  bullseye  2.13.1-1.1  fixed      forky, sid, bookworm, trixie  2.14-2  fixed    The information below is based on the following data on fixed versions.    Package  Type  Release  Fixed Version  Urgency  Origin  Debian Bugs     jansson   source  wheezy  2.3.1-2+deb7u1     DLA-471-1        jansson   source  jessie  2.7-1+deb8u1     DSA-3577-1        jansson   source  (unstable)  2.7-5       823238     Notes   https://github.com/akheron/jansson/issues/282   https://github.com/akheron/jansson/pull/284   https://www.openwall.com/lists/oss-security/2016/05/01/5     Search for package or bug name:     Reporting problems     Home  -  Debian Security  -  Source   (Git)"
+        },
+        {
+          "source": "ubuntu_security_tracker",
+          "url": "https://ubuntu.com/security/CVE-2016-4425",
+          "text": "Ubuntu CVE status: active\nDescription:\nJansson 2.7 and earlier allows context-dependent attackers to cause a\ndenial of service (deep recursion, stack consumption, and crash) via\ncrafted JSON data.\n\nPer-release statuses:\n- yakkety: ignored end of life\n- zesty: ignored end of life\n- artful: ignored end of life\n- bionic: not-affected 2.9-1\n- trusty: released 2.5-2ubuntu0.1\n- upstream: needs-triage\n- wily: ignored end of life\n- xenial: released 2.7-3ubuntu0.1\n- precise: ignored end of life"
+        },
+        {
+          "source": "github_issue",
+          "url": "https://github.com/akheron/jansson/issues/282",
+          "text": "Title: Stack exhaustion parsing a JSON file\nURL: https://github.com/akheron/jansson/issues/282\n\nHi,\n\nA crash caused by stack exhaustion parsing a JSON was found. It affects, at least version 2.5 as well as the last git revision (and maybe others). To reproduce using jshon:\n\n```\n$ python -c 'print \"[\"*100000' > test.json\n$ gdb --args ./jshon -F test.json\n...\nProgram received signal SIGSEGV, Segmentation fault.\n0x00007ffff4e50645 in ?? () from /usr/lib/x86_64-linux-gnu/libasan.so.0\n\n(gdb) bt 20\n#0  0x00007ffff4e50645 in ?? () from /usr/lib/x86_64-linux-gnu/libasan.so.0\n#1  0x00007ffff4e53b7d in ?? () from /usr/lib/x86_64-linux-gnu/libasan.so.0\n#2  0x00007ffff4e60443 in malloc () from /usr/lib/x86_64-linux-gnu/libasan.so.0\n#3  0x000000000040c422 in jsonp_malloc (size=48) at memory.c:24\n#4  0x000000000040f196 in json_array () at value.c:325\n#5  0x000000000040afd0 in parse_array (lex=0x7fffffffe110, flags=0, error=0x7fffffffe2e0) at load.c:746\n#6  0x000000000040b4b2 in parse_value (lex=0x7fffffffe110, flags=0, error=0x7fffffffe2e0) at load.c:830\n#7  0x000000000040b064 in parse_array (lex=0x7fffffffe110, flags=0, error=0x7fffffffe2e0) at load.c:755\n#8  0x000000000040b4b2 in parse_value (lex=0x7fffffffe110, flags=0, error=0x7fffffffe2e0) at load.c:830\n#9  0x000000000040b064 in parse_array (lex=0x7fffffffe110, flags=0, error=0x7fffffffe2e0) at load.c:755\n#10 0x000000000040b4b2 in parse_value (lex=0x7fffffffe110, flags=0, error=0x7fffffffe2e0) at load.c:830\n#11 0x000000000040b064 in parse_array (lex=0x7fffffffe110, flags=0, error=0x7fffffffe2e0) at load.c:755\n#12 0x000000000040b4b2 in parse_value (lex=0x7fffffffe110, flags=0, error=0x7fffffffe2e0) at load.c:830\n#13 0x000000000040b064 in parse_array (lex=0x7fffffffe110, flags=0, error=0x7fffffffe2e0) at load.c:755\n#14 0x000000000040b4b2 in parse_value (lex=0x7fffffffe110, flags=0, error=0x7fffffffe2e0) at load.c:830\n#15 0x000000000040b064 in parse_array (lex=0x7fffffffe110, flags=0, error=0x7fffffffe2e0) at load.c:755\n#16 0x000000000040b4b2 in parse_value (lex=0x7fffffffe110, flags=0, error=0x7fffffffe2e0) at load.c:830\n#17 0x000000000040b064 in parse_array (lex=0x7fffffffe110, flags=0, error=0x7fffffffe2e0) at load.c:755\n#18 0x000000000040b4b2 in parse_value (lex=0x7fffffffe110, flags=0, error=0x7fffffffe2e0) at load.c:830\n#19 0x000000000040b064 in parse_array (lex=0x7fffffffe110, flags=0, error=0x7fffffffe2e0) at load.c:755\n(More stack frames follow...)\n```"
+        },
+        {
+          "source": "github_issue_comments",
+          "url": "https://github.com/akheron/jansson/issues/282",
+          "text": "dev-zzo @ 2016-05-02T08:55:11Z\nThis is caused due to an unlimited parsing depth when parsing JSON arrays; this allows the `parse_value()` -> `parse_array()` -> `parse_value()` chain to grow without limit. To that end, a similar effect may be achieved via objects, using a patter of `{\"a\":` repeated 1000s, triggering the `parse_value()` -> `parse_object()` -> `parse_value()` chain.\n\ngaa-cifasis @ 2016-05-02T09:11:36Z\n> To that end, a similar effect may be achieved via objects, using a patter of {\"a\": repeated 1000s, triggering the parse_value() -> parse_object() -> parse_value() chain.\n\nIndeed. It takes a less than 100kb json file to crash the library, which is bad if you are receiving untrusted inputs. Is there any plans to limit the parsing depth?\n\ndev-zzo @ 2016-05-02T09:19:42Z\nI have no idea since I'm not the maintainer. I think I could throw a patch together to fix the root cause, though.\n\ndev-zzo @ 2016-05-02T13:01:48Z\nThe fix is in pull request #283.\n\nakheron @ 2016-05-03T10:08:20Z\nFixed in #284\n\njunovitch @ 2016-05-14T12:31:27Z\nHi folks. We have reports on FreeBSD that the change in #284 causes a regression on large flat JSON files.  The report is https://bugs.FreeBSD.org/209492.\n\nAny recommendations?\n\ndev-zzo @ 2016-05-14T12:45:13Z\n@junovitch would be awesome if you could a) open a separate issue with b) a sample attached for testing and c) link to the exact patch applied by FreeBSD."
+        },
+        {
+          "source": "github_pull_request",
+          "url": "https://github.com/akheron/jansson/pull/284",
+          "text": "Title: Fix for issue #282\nURL: https://github.com/akheron/jansson/pull/284\nMerged: 2016-05-03T10:07:46Z\n\nThis is a squashed version of the original fixes in pull request #283. No other changes were made."
+        },
+        {
+          "source": "github_fix_commit",
+          "url": "https://github.com/akheron/jansson/commit/64ce0ad3731ebd77e02897b07920eadd0e2cc318",
+          "text": "Commit: 64ce0ad3731ebd77e02897b07920eadd0e2cc318\nURL: https://github.com/akheron/jansson/commit/64ce0ad3731ebd77e02897b07920eadd0e2cc318\nAuthor date: 2016-05-02T11:59:26Z\nCommitter date: 2016-05-03T08:22:06Z\n\nFix for issue #282\n\nThe fix limits recursion depths when parsing arrays and objects.\nThe limit is configurable via the `JSON_PARSER_MAX_DEPTH` setting\nwithin `jansson_config.h` and is set by default to 2048.\n\nUpdate the RFC conformance document to note the limit; the RFC\nallows limits to be set by the implementation so nothing has\nactually changed w.r.t. conformance state.\n\nReported by Gustavo Grieco.\n\nChanged files:\n- android/jansson_config.h (modified, +4/-0)\n- cmake/jansson_config.h.cmake (modified, +4/-0)\n- doc/conformance.rst (modified, +10/-0)\n- src/jansson_config.h.in (modified, +4/-0)\n- src/load.c (modified, +10/-0)\n- test/suites/invalid/recursion-depth/error (added, +2/-0)\n- test/suites/invalid/recursion-depth/input (added, +1/-0)"
+        },
+        {
+          "source": "local_upstream_changes",
+          "path": "/home/yans/code/safelibs/ported/libjansson/original/jansson-2.14/CHANGES",
+          "line_start": 212,
+          "line_end": 239,
+          "text": "\nVersion 2.8\n===========\n\nReleased 2016-08-30\n\n* New features:\n\n  - Always preserve insertion order of object items.\n    `json_object_iter()` and friends, `json_object_foreach()` and\n    `json_dumps()` and friends now always work in the insertion order of\n    object items (#293).\n\n  - Add `json_object_foreach_safe()` macro that allows\n    `json_object_del()` calls during iteration (#230).\n\n  - Add `json_get_alloc_funcs()` to allow reading the allocation\n    functions set by `json_set_alloc_funcs()` (#262, #264).\n\n  - Add `json_pack()` format specifiers s?, o? and O? for values that\n    can be null (#261, #270).\n\n* Bug fixes:\n\n  - Fix a crash when parsing inputs consisting of very deeply nested\n    arrays or objects (#282, #284).\n\n  - Never convert numbers to integers in the parser when"
+        },
+        {
+          "source": "local_debian_changelog",
+          "path": "/home/yans/code/safelibs/ported/libjansson/original/jansson-2.14/debian/changelog",
+          "line_start": 100,
+          "line_end": 106,
+          "text": "jansson (2.7-5) unstable; urgency=high\n\n  * Bump Standards-Version to 3.9.8 (no changes needed)\n  * Fix stack exhaustion when parsing JSON as per CVE-2016-4425\n    (Closes: #823238)\n\n -- Alessandro Ghedini <ghedo@debian.org>  Sat, 14 May 2016 16:45:26 +0100"
+        }
+      ],
+      "raw_records": {
+        "nvd": {
+          "id": "CVE-2016-4425",
+          "sourceIdentifier": "cve@mitre.org",
+          "published": "2016-05-17T14:08:12.657",
+          "lastModified": "2025-12-04T17:15:49.597",
+          "vulnStatus": "Deferred",
+          "cveTags": [],
+          "descriptions": [
+            {
+              "lang": "en",
+              "value": "Jansson 2.7 and earlier allows context-dependent attackers to cause a denial of service (deep recursion, stack consumption, and crash) via crafted JSON data."
+            },
+            {
+              "lang": "es",
+              "value": "Jansson 2.7 y versiones anteriores permite a atacantes dependientes de contexto provocar una denegaci\u00f3n de servicio (recursi\u00f3n profunda, consumo de pila y ca\u00edda) a trav\u00e9s de datos JSON manipulados."
+            }
+          ],
+          "metrics": {
+            "cvssMetricV31": [
+              {
+                "source": "134c704f-9b21-4f2e-91b3-4a467353bcc0",
+                "type": "Secondary",
+                "cvssData": {
+                  "version": "3.1",
+                  "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H",
+                  "baseScore": 6.5,
+                  "baseSeverity": "MEDIUM",
+                  "attackVector": "NETWORK",
+                  "attackComplexity": "LOW",
+                  "privilegesRequired": "NONE",
+                  "userInteraction": "REQUIRED",
+                  "scope": "UNCHANGED",
+                  "confidentialityImpact": "NONE",
+                  "integrityImpact": "NONE",
+                  "availabilityImpact": "HIGH"
+                },
+                "exploitabilityScore": 2.8,
+                "impactScore": 3.6
+              }
+            ],
+            "cvssMetricV30": [
+              {
+                "source": "nvd@nist.gov",
+                "type": "Primary",
+                "cvssData": {
+                  "version": "3.0",
+                  "vectorString": "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+                  "baseScore": 7.5,
+                  "baseSeverity": "HIGH",
+                  "attackVector": "NETWORK",
+                  "attackComplexity": "LOW",
+                  "privilegesRequired": "NONE",
+                  "userInteraction": "NONE",
+                  "scope": "UNCHANGED",
+                  "confidentialityImpact": "NONE",
+                  "integrityImpact": "NONE",
+                  "availabilityImpact": "HIGH"
+                },
+                "exploitabilityScore": 3.9,
+                "impactScore": 3.6
+              }
+            ],
+            "cvssMetricV2": [
+              {
+                "source": "nvd@nist.gov",
+                "type": "Primary",
+                "cvssData": {
+                  "version": "2.0",
+                  "vectorString": "AV:N/AC:L/Au:N/C:N/I:N/A:P",
+                  "baseScore": 5.0,
+                  "accessVector": "NETWORK",
+                  "accessComplexity": "LOW",
+                  "authentication": "NONE",
+                  "confidentialityImpact": "NONE",
+                  "integrityImpact": "NONE",
+                  "availabilityImpact": "PARTIAL"
+                },
+                "baseSeverity": "MEDIUM",
+                "exploitabilityScore": 10.0,
+                "impactScore": 2.9,
+                "acInsufInfo": false,
+                "obtainAllPrivilege": false,
+                "obtainUserPrivilege": false,
+                "obtainOtherPrivilege": false,
+                "userInteractionRequired": false
+              }
+            ]
+          },
+          "weaknesses": [
+            {
+              "source": "nvd@nist.gov",
+              "type": "Primary",
+              "description": [
+                {
+                  "lang": "en",
+                  "value": "CWE-20"
+                }
+              ]
+            },
+            {
+              "source": "134c704f-9b21-4f2e-91b3-4a467353bcc0",
+              "type": "Secondary",
+              "description": [
+                {
+                  "lang": "en",
+                  "value": "CWE-674"
+                }
+              ]
+            }
+          ],
+          "configurations": [
+            {
+              "nodes": [
+                {
+                  "operator": "OR",
+                  "negate": false,
+                  "cpeMatch": [
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:jansson_project:jansson:*:*:*:*:*:*:*:*",
+                      "versionEndIncluding": "2.7",
+                      "matchCriteriaId": "1D0F6F49-CF05-4F59-A732-6B983533749F"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "references": [
+            {
+              "url": "http://www.debian.org/security/2015/dsa-3577",
+              "source": "cve@mitre.org"
+            },
+            {
+              "url": "http://www.openwall.com/lists/oss-security/2016/05/01/5",
+              "source": "cve@mitre.org"
+            },
+            {
+              "url": "http://www.openwall.com/lists/oss-security/2016/05/02/1",
+              "source": "cve@mitre.org"
+            },
+            {
+              "url": "http://www.openwall.com/lists/oss-security/2016/05/03/3",
+              "source": "cve@mitre.org"
+            },
+            {
+              "url": "https://github.com/akheron/jansson/issues/282",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Patch"
+              ]
+            },
+            {
+              "url": "https://github.com/akheron/jansson/pull/284",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Patch"
+              ]
+            },
+            {
+              "url": "https://github.com/akheron/jansson/pull/284/commits/64ce0ad3731ebd77e02897b07920eadd0e2cc318",
+              "source": "cve@mitre.org"
+            },
+            {
+              "url": "http://www.debian.org/security/2015/dsa-3577",
+              "source": "af854a3a-2127-422b-91ae-364da2661108"
+            },
+            {
+              "url": "http://www.openwall.com/lists/oss-security/2016/05/01/5",
+              "source": "af854a3a-2127-422b-91ae-364da2661108"
+            },
+            {
+              "url": "http://www.openwall.com/lists/oss-security/2016/05/02/1",
+              "source": "af854a3a-2127-422b-91ae-364da2661108"
+            },
+            {
+              "url": "http://www.openwall.com/lists/oss-security/2016/05/03/3",
+              "source": "af854a3a-2127-422b-91ae-364da2661108"
+            },
+            {
+              "url": "https://github.com/akheron/jansson/issues/282",
+              "source": "af854a3a-2127-422b-91ae-364da2661108",
+              "tags": [
+                "Patch"
+              ]
+            },
+            {
+              "url": "https://github.com/akheron/jansson/pull/284",
+              "source": "af854a3a-2127-422b-91ae-364da2661108",
+              "tags": [
+                "Patch"
+              ]
+            },
+            {
+              "url": "https://github.com/akheron/jansson/pull/284/commits/64ce0ad3731ebd77e02897b07920eadd0e2cc318",
+              "source": "af854a3a-2127-422b-91ae-364da2661108"
+            }
+          ]
+        },
+        "mitre_cveawg": {
+          "containers": {
+            "cna": {
+              "affected": [
+                {
+                  "product": "n/a",
+                  "vendor": "n/a",
+                  "versions": [
+                    {
+                      "status": "affected",
+                      "version": "n/a"
+                    }
+                  ]
+                }
+              ],
+              "datePublic": "2016-05-01T00:00:00.000Z",
+              "descriptions": [
+                {
+                  "lang": "en",
+                  "value": "Jansson 2.7 and earlier allows context-dependent attackers to cause a denial of service (deep recursion, stack consumption, and crash) via crafted JSON data."
+                }
+              ],
+              "problemTypes": [
+                {
+                  "descriptions": [
+                    {
+                      "description": "n/a",
+                      "lang": "en",
+                      "type": "text"
+                    }
+                  ]
+                }
+              ],
+              "providerMetadata": {
+                "dateUpdated": "2016-05-17T13:57:02.000Z",
+                "orgId": "8254265b-2729-46b6-b9e3-3dfca2d5bfca",
+                "shortName": "mitre"
+              },
+              "references": [
+                {
+                  "name": "[oss-security] 20160503 Re: CVE Request: Jansson: stack exhaustion parsing a JSON file",
+                  "tags": [
+                    "mailing-list",
+                    "x_refsource_MLIST"
+                  ],
+                  "url": "http://www.openwall.com/lists/oss-security/2016/05/03/3"
+                },
+                {
+                  "name": "[oss-security] 20160501 CVE Request: Jansson: stack exhaustion parsing a JSON file",
+                  "tags": [
+                    "mailing-list",
+                    "x_refsource_MLIST"
+                  ],
+                  "url": "http://www.openwall.com/lists/oss-security/2016/05/01/5"
+                },
+                {
+                  "name": "[oss-security] 20160502 Re: CVE Request: Jansson: stack exhaustion parsing a JSON file",
+                  "tags": [
+                    "mailing-list",
+                    "x_refsource_MLIST"
+                  ],
+                  "url": "http://www.openwall.com/lists/oss-security/2016/05/02/1"
+                },
+                {
+                  "tags": [
+                    "x_refsource_CONFIRM"
+                  ],
+                  "url": "https://github.com/akheron/jansson/issues/282"
+                },
+                {
+                  "tags": [
+                    "x_refsource_CONFIRM"
+                  ],
+                  "url": "https://github.com/akheron/jansson/pull/284"
+                },
+                {
+                  "tags": [
+                    "x_refsource_CONFIRM"
+                  ],
+                  "url": "https://github.com/akheron/jansson/pull/284/commits/64ce0ad3731ebd77e02897b07920eadd0e2cc318"
+                },
+                {
+                  "name": "DSA-3577",
+                  "tags": [
+                    "vendor-advisory",
+                    "x_refsource_DEBIAN"
+                  ],
+                  "url": "http://www.debian.org/security/2015/dsa-3577"
+                }
+              ],
+              "x_legacyV4Record": {
+                "CVE_data_meta": {
+                  "ASSIGNER": "cve@mitre.org",
+                  "ID": "CVE-2016-4425",
+                  "STATE": "PUBLIC"
+                },
+                "affects": {
+                  "vendor": {
+                    "vendor_data": [
+                      {
+                        "product": {
+                          "product_data": [
+                            {
+                              "product_name": "n/a",
+                              "version": {
+                                "version_data": [
+                                  {
+                                    "version_value": "n/a"
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        },
+                        "vendor_name": "n/a"
+                      }
+                    ]
+                  }
+                },
+                "data_format": "MITRE",
+                "data_type": "CVE",
+                "data_version": "4.0",
+                "description": {
+                  "description_data": [
+                    {
+                      "lang": "eng",
+                      "value": "Jansson 2.7 and earlier allows context-dependent attackers to cause a denial of service (deep recursion, stack consumption, and crash) via crafted JSON data."
+                    }
+                  ]
+                },
+                "problemtype": {
+                  "problemtype_data": [
+                    {
+                      "description": [
+                        {
+                          "lang": "eng",
+                          "value": "n/a"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "references": {
+                  "reference_data": [
+                    {
+                      "name": "[oss-security] 20160503 Re: CVE Request: Jansson: stack exhaustion parsing a JSON file",
+                      "refsource": "MLIST",
+                      "url": "http://www.openwall.com/lists/oss-security/2016/05/03/3"
+                    },
+                    {
+                      "name": "[oss-security] 20160501 CVE Request: Jansson: stack exhaustion parsing a JSON file",
+                      "refsource": "MLIST",
+                      "url": "http://www.openwall.com/lists/oss-security/2016/05/01/5"
+                    },
+                    {
+                      "name": "[oss-security] 20160502 Re: CVE Request: Jansson: stack exhaustion parsing a JSON file",
+                      "refsource": "MLIST",
+                      "url": "http://www.openwall.com/lists/oss-security/2016/05/02/1"
+                    },
+                    {
+                      "name": "https://github.com/akheron/jansson/issues/282",
+                      "refsource": "CONFIRM",
+                      "url": "https://github.com/akheron/jansson/issues/282"
+                    },
+                    {
+                      "name": "https://github.com/akheron/jansson/pull/284",
+                      "refsource": "CONFIRM",
+                      "url": "https://github.com/akheron/jansson/pull/284"
+                    },
+                    {
+                      "name": "https://github.com/akheron/jansson/pull/284/commits/64ce0ad3731ebd77e02897b07920eadd0e2cc318",
+                      "refsource": "CONFIRM",
+                      "url": "https://github.com/akheron/jansson/pull/284/commits/64ce0ad3731ebd77e02897b07920eadd0e2cc318"
+                    },
+                    {
+                      "name": "DSA-3577",
+                      "refsource": "DEBIAN",
+                      "url": "http://www.debian.org/security/2015/dsa-3577"
+                    }
+                  ]
+                }
+              }
+            },
+            "adp": [
+              {
+                "providerMetadata": {
+                  "orgId": "af854a3a-2127-422b-91ae-364da2661108",
+                  "shortName": "CVE",
+                  "dateUpdated": "2024-08-06T00:32:24.624Z"
+                },
+                "title": "CVE Program Container",
+                "references": [
+                  {
+                    "name": "[oss-security] 20160503 Re: CVE Request: Jansson: stack exhaustion parsing a JSON file",
+                    "tags": [
+                      "mailing-list",
+                      "x_refsource_MLIST",
+                      "x_transferred"
+                    ],
+                    "url": "http://www.openwall.com/lists/oss-security/2016/05/03/3"
+                  },
+                  {
+                    "name": "[oss-security] 20160501 CVE Request: Jansson: stack exhaustion parsing a JSON file",
+                    "tags": [
+                      "mailing-list",
+                      "x_refsource_MLIST",
+                      "x_transferred"
+                    ],
+                    "url": "http://www.openwall.com/lists/oss-security/2016/05/01/5"
+                  },
+                  {
+                    "name": "[oss-security] 20160502 Re: CVE Request: Jansson: stack exhaustion parsing a JSON file",
+                    "tags": [
+                      "mailing-list",
+                      "x_refsource_MLIST",
+                      "x_transferred"
+                    ],
+                    "url": "http://www.openwall.com/lists/oss-security/2016/05/02/1"
+                  },
+                  {
+                    "tags": [
+                      "x_refsource_CONFIRM",
+                      "x_transferred"
+                    ],
+                    "url": "https://github.com/akheron/jansson/issues/282"
+                  },
+                  {
+                    "tags": [
+                      "x_refsource_CONFIRM",
+                      "x_transferred"
+                    ],
+                    "url": "https://github.com/akheron/jansson/pull/284"
+                  },
+                  {
+                    "tags": [
+                      "x_refsource_CONFIRM",
+                      "x_transferred"
+                    ],
+                    "url": "https://github.com/akheron/jansson/pull/284/commits/64ce0ad3731ebd77e02897b07920eadd0e2cc318"
+                  },
+                  {
+                    "name": "DSA-3577",
+                    "tags": [
+                      "vendor-advisory",
+                      "x_refsource_DEBIAN",
+                      "x_transferred"
+                    ],
+                    "url": "http://www.debian.org/security/2015/dsa-3577"
+                  }
+                ]
+              },
+              {
+                "problemTypes": [
+                  {
+                    "descriptions": [
+                      {
+                        "type": "CWE",
+                        "cweId": "CWE-674",
+                        "lang": "en",
+                        "description": "CWE-674 Uncontrolled Recursion"
+                      }
+                    ]
+                  }
+                ],
+                "metrics": [
+                  {
+                    "cvssV3_1": {
+                      "scope": "UNCHANGED",
+                      "version": "3.1",
+                      "baseScore": 6.5,
+                      "attackVector": "NETWORK",
+                      "baseSeverity": "MEDIUM",
+                      "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H",
+                      "integrityImpact": "NONE",
+                      "userInteraction": "REQUIRED",
+                      "attackComplexity": "LOW",
+                      "availabilityImpact": "HIGH",
+                      "privilegesRequired": "NONE",
+                      "confidentialityImpact": "NONE"
+                    }
+                  },
+                  {
+                    "other": {
+                      "type": "ssvc",
+                      "content": {
+                        "timestamp": "2025-12-04T17:07:50.922237Z",
+                        "id": "CVE-2016-4425",
+                        "options": [
+                          {
+                            "Exploitation": "poc"
+                          },
+                          {
+                            "Automatable": "no"
+                          },
+                          {
+                            "Technical Impact": "partial"
+                          }
+                        ],
+                        "role": "CISA Coordinator",
+                        "version": "2.0.3"
+                      }
+                    }
+                  }
+                ],
+                "title": "CISA ADP Vulnrichment",
+                "providerMetadata": {
+                  "orgId": "134c704f-9b21-4f2e-91b3-4a467353bcc0",
+                  "shortName": "CISA-ADP",
+                  "dateUpdated": "2025-12-04T17:09:13.364Z"
+                }
+              }
+            ]
+          },
+          "cveMetadata": {
+            "assignerOrgId": "8254265b-2729-46b6-b9e3-3dfca2d5bfca",
+            "assignerShortName": "mitre",
+            "cveId": "CVE-2016-4425",
+            "datePublished": "2016-05-17T14:00:00.000Z",
+            "dateReserved": "2016-05-02T00:00:00.000Z",
+            "dateUpdated": "2025-12-04T17:09:13.364Z",
+            "state": "PUBLISHED"
+          },
+          "dataType": "CVE_RECORD",
+          "dataVersion": "5.2"
+        },
+        "ubuntu_security": {
+          "id": "CVE-2016-4425",
+          "published": "2016-05-17T14:08:00",
+          "updated_at": "2025-08-25T22:03:20.585105+00:00",
+          "description": "\nJansson 2.7 and earlier allows context-dependent attackers to cause a\ndenial of service (deep recursion, stack consumption, and crash) via\ncrafted JSON data.",
+          "ubuntu_description": "\nIt was discovered that Jansson incorrectly handled certain JSON files.\nAn attacker could possibly use this issue to cause a denial of service.",
+          "notes": [],
+          "codename": null,
+          "priority": "low",
+          "cvss3": 7.5,
+          "impact": {
+            "baseMetricV3": {
+              "cvssV3": {
+                "version": "3.0",
+                "vectorString": "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+                "attackVector": "NETWORK",
+                "attackComplexity": "LOW",
+                "privilegesRequired": "NONE",
+                "userInteraction": "NONE",
+                "scope": "UNCHANGED",
+                "confidentialityImpact": "NONE",
+                "integrityImpact": "NONE",
+                "availabilityImpact": "HIGH",
+                "baseScore": 7.5,
+                "baseSeverity": "HIGH"
+              }
+            }
+          },
+          "status": "active",
+          "mitigation": "",
+          "references": [
+            "https://github.com/akheron/jansson/issues/282",
+            "http://www.openwall.com/lists/oss-security/2016/05/01/5",
+            "https://www.cve.org/CVERecord?id=CVE-2016-4425"
+          ],
+          "bugs": [
+            ""
+          ],
+          "patches": {
+            "jansson": []
+          },
+          "tags": {},
+          "packages": [
+            {
+              "name": "jansson",
+              "source": "https://ubuntu.com/security/cve?package=jansson",
+              "ubuntu": "https://packages.ubuntu.com/search?suite=all&section=all&arch=any&searchon=sourcenames&keywords=jansson",
+              "debian": "https://tracker.debian.org/pkg/jansson",
+              "statuses": [
+                {
+                  "release_codename": "yakkety",
+                  "status": "ignored",
+                  "description": "end of life",
+                  "component": null,
+                  "pocket": "security"
+                },
+                {
+                  "release_codename": "zesty",
+                  "status": "ignored",
+                  "description": "end of life",
+                  "component": null,
+                  "pocket": "security"
+                },
+                {
+                  "release_codename": "artful",
+                  "status": "ignored",
+                  "description": "end of life",
+                  "component": null,
+                  "pocket": "security"
+                },
+                {
+                  "release_codename": "bionic",
+                  "status": "not-affected",
+                  "description": "2.9-1",
+                  "component": null,
+                  "pocket": "security"
+                },
+                {
+                  "release_codename": "trusty",
+                  "status": "released",
+                  "description": "2.5-2ubuntu0.1",
+                  "component": null,
+                  "pocket": "security"
+                },
+                {
+                  "release_codename": "upstream",
+                  "status": "needs-triage",
+                  "description": "",
+                  "component": null,
+                  "pocket": "security"
+                },
+                {
+                  "release_codename": "wily",
+                  "status": "ignored",
+                  "description": "end of life",
+                  "component": null,
+                  "pocket": "security"
+                },
+                {
+                  "release_codename": "xenial",
+                  "status": "released",
+                  "description": "2.7-3ubuntu0.1",
+                  "component": null,
+                  "pocket": "security"
+                },
+                {
+                  "release_codename": "precise",
+                  "status": "ignored",
+                  "description": "end of life",
+                  "component": null,
+                  "pocket": "security"
+                }
+              ]
+            }
+          ],
+          "notices_ids": [],
+          "notices": []
+        },
+        "debian_tracker_page_text": "CVE-2016-4425     CVE-2016-4425      Name   CVE-2016-4425     Description   Jansson 2.7 and earlier allows context-dependent attackers to cause a denial of service (deep recursion, stack consumption, and crash) via crafted JSON data.     Source    CVE  (at  NVD ;  CERT ,  ENISA ,  LWN ,  oss-sec ,  fulldisc ,  Debian ELTS ,  Red Hat ,  Ubuntu ,  Gentoo , SUSE  bugzilla / CVE , GitHub  advisories / code / issues ,  web search ,  more )     References    DLA-471-1 ,  DSA-3577-1      Debian Bugs    823238     Vulnerable and fixed packages  The table below lists information on source packages.    Source Package  Release  Version  Status     jansson  ( PTS )  bullseye  2.13.1-1.1  fixed      forky, sid, bookworm, trixie  2.14-2  fixed    The information below is based on the following data on fixed versions.    Package  Type  Release  Fixed Version  Urgency  Origin  Debian Bugs     jansson   source  wheezy  2.3.1-2+deb7u1     DLA-471-1        jansson   source  jessie  2.7-1+deb8u1     DSA-3577-1        jansson   source  (unstable)  2.7-5       823238     Notes   https://github.com/akheron/jansson/issues/282   https://github.com/akheron/jansson/pull/284   https://www.openwall.com/lists/oss-security/2016/05/01/5     Search for package or bug name:     Reporting problems     Home  -  Debian Security  -  Source   (Git)",
+        "github_issue": {
+          "html_url": "https://github.com/akheron/jansson/issues/282",
+          "title": "Stack exhaustion parsing a JSON file",
+          "state": "closed",
+          "created_at": "2016-05-01T19:56:44Z",
+          "updated_at": "2016-05-14T12:45:13Z",
+          "body": "Hi,\n\nA crash caused by stack exhaustion parsing a JSON was found. It affects, at least version 2.5 as well as the last git revision (and maybe others). To reproduce using jshon:\n\n```\n$ python -c 'print \"[\"*100000' > test.json\n$ gdb --args ./jshon -F test.json\n...\nProgram received signal SIGSEGV, Segmentation fault.\n0x00007ffff4e50645 in ?? () from /usr/lib/x86_64-linux-gnu/libasan.so.0\n\n(gdb) bt 20\n#0  0x00007ffff4e50645 in ?? () from /usr/lib/x86_64-linux-gnu/libasan.so.0\n#1  0x00007ffff4e53b7d in ?? () from /usr/lib/x86_64-linux-gnu/libasan.so.0\n#2  0x00007ffff4e60443 in malloc () from /usr/lib/x86_64-linux-gnu/libasan.so.0\n#3  0x000000000040c422 in jsonp_malloc (size=48) at memory.c:24\n#4  0x000000000040f196 in json_array () at value.c:325\n#5  0x000000000040afd0 in parse_array (lex=0x7fffffffe110, flags=0, error=0x7fffffffe2e0) at load.c:746\n#6  0x000000000040b4b2 in parse_value (lex=0x7fffffffe110, flags=0, error=0x7fffffffe2e0) at load.c:830\n#7  0x000000000040b064 in parse_array (lex=0x7fffffffe110, flags=0, error=0x7fffffffe2e0) at load.c:755\n#8  0x000000000040b4b2 in parse_value (lex=0x7fffffffe110, flags=0, error=0x7fffffffe2e0) at load.c:830\n#9  0x000000000040b064 in parse_array (lex=0x7fffffffe110, flags=0, error=0x7fffffffe2e0) at load.c:755\n#10 0x000000000040b4b2 in parse_value (lex=0x7fffffffe110, flags=0, error=0x7fffffffe2e0) at load.c:830\n#11 0x000000000040b064 in parse_array (lex=0x7fffffffe110, flags=0, error=0x7fffffffe2e0) at load.c:755\n#12 0x000000000040b4b2 in parse_value (lex=0x7fffffffe110, flags=0, error=0x7fffffffe2e0) at load.c:830\n#13 0x000000000040b064 in parse_array (lex=0x7fffffffe110, flags=0, error=0x7fffffffe2e0) at load.c:755\n#14 0x000000000040b4b2 in parse_value (lex=0x7fffffffe110, flags=0, error=0x7fffffffe2e0) at load.c:830\n#15 0x000000000040b064 in parse_array (lex=0x7fffffffe110, flags=0, error=0x7fffffffe2e0) at load.c:755\n#16 0x000000000040b4b2 in parse_value (lex=0x7fffffffe110, flags=0, error=0x7fffffffe2e0) at load.c:830\n#17 0x000000000040b064 in parse_array (lex=0x7fffffffe110, flags=0, error=0x7fffffffe2e0) at load.c:755\n#18 0x000000000040b4b2 in parse_value (lex=0x7fffffffe110, flags=0, error=0x7fffffffe2e0) at load.c:830\n#19 0x000000000040b064 in parse_array (lex=0x7fffffffe110, flags=0, error=0x7fffffffe2e0) at load.c:755\n(More stack frames follow...)\n```\n",
+          "labels": []
+        },
+        "github_issue_comments": [
+          {
+            "user": "dev-zzo",
+            "created_at": "2016-05-02T08:55:11Z",
+            "updated_at": "2016-05-02T08:55:24Z",
+            "body": "This is caused due to an unlimited parsing depth when parsing JSON arrays; this allows the `parse_value()` -> `parse_array()` -> `parse_value()` chain to grow without limit. To that end, a similar effect may be achieved via objects, using a patter of `{\"a\":` repeated 1000s, triggering the `parse_value()` -> `parse_object()` -> `parse_value()` chain.\n"
+          },
+          {
+            "user": "gaa-cifasis",
+            "created_at": "2016-05-02T09:11:36Z",
+            "updated_at": "2016-05-02T09:11:36Z",
+            "body": "> To that end, a similar effect may be achieved via objects, using a patter of {\"a\": repeated 1000s, triggering the parse_value() -> parse_object() -> parse_value() chain.\n\nIndeed. It takes a less than 100kb json file to crash the library, which is bad if you are receiving untrusted inputs. Is there any plans to limit the parsing depth?\n"
+          },
+          {
+            "user": "dev-zzo",
+            "created_at": "2016-05-02T09:19:42Z",
+            "updated_at": "2016-05-02T09:19:42Z",
+            "body": "I have no idea since I'm not the maintainer. I think I could throw a patch together to fix the root cause, though.\n"
+          },
+          {
+            "user": "dev-zzo",
+            "created_at": "2016-05-02T13:01:48Z",
+            "updated_at": "2016-05-02T13:01:48Z",
+            "body": "The fix is in pull request #283.\n"
+          },
+          {
+            "user": "akheron",
+            "created_at": "2016-05-03T10:08:20Z",
+            "updated_at": "2016-05-03T10:08:20Z",
+            "body": "Fixed in #284 \n"
+          },
+          {
+            "user": "junovitch",
+            "created_at": "2016-05-14T12:31:27Z",
+            "updated_at": "2016-05-14T12:31:27Z",
+            "body": "Hi folks. We have reports on FreeBSD that the change in #284 causes a regression on large flat JSON files.  The report is https://bugs.FreeBSD.org/209492.\n\nAny recommendations?\n"
+          },
+          {
+            "user": "dev-zzo",
+            "created_at": "2016-05-14T12:45:13Z",
+            "updated_at": "2016-05-14T12:45:13Z",
+            "body": "@junovitch would be awesome if you could a) open a separate issue with b) a sample attached for testing and c) link to the exact patch applied by FreeBSD.\n"
+          }
+        ],
+        "github_pull_request": {
+          "html_url": "https://github.com/akheron/jansson/pull/284",
+          "title": "Fix for issue #282",
+          "state": "closed",
+          "created_at": "2016-05-03T08:28:51Z",
+          "updated_at": "2016-05-03T10:49:37Z",
+          "merged_at": "2016-05-03T10:07:46Z",
+          "body": "This is a squashed version of the original fixes in pull request #283. No other changes were made.\n"
+        },
+        "github_fix_commit": {
+          "sha": "64ce0ad3731ebd77e02897b07920eadd0e2cc318",
+          "html_url": "https://github.com/akheron/jansson/commit/64ce0ad3731ebd77e02897b07920eadd0e2cc318",
+          "message": "Fix for issue #282\n\nThe fix limits recursion depths when parsing arrays and objects.\nThe limit is configurable via the `JSON_PARSER_MAX_DEPTH` setting\nwithin `jansson_config.h` and is set by default to 2048.\n\nUpdate the RFC conformance document to note the limit; the RFC\nallows limits to be set by the implementation so nothing has\nactually changed w.r.t. conformance state.\n\nReported by Gustavo Grieco.",
+          "author": {
+            "name": "Dmitry Janushkevich",
+            "email": "gauri@tut.by",
+            "date": "2016-05-02T11:59:26Z"
+          },
+          "committer": {
+            "name": "Administrator",
+            "email": "gauri@tut.by",
+            "date": "2016-05-03T08:22:06Z"
+          },
+          "stats": {
+            "total": 35,
+            "additions": 35,
+            "deletions": 0
+          },
+          "files": [
+            {
+              "filename": "android/jansson_config.h",
+              "status": "modified",
+              "additions": 4,
+              "deletions": 0,
+              "changes": 4
+            },
+            {
+              "filename": "cmake/jansson_config.h.cmake",
+              "status": "modified",
+              "additions": 4,
+              "deletions": 0,
+              "changes": 4
+            },
+            {
+              "filename": "doc/conformance.rst",
+              "status": "modified",
+              "additions": 10,
+              "deletions": 0,
+              "changes": 10
+            },
+            {
+              "filename": "src/jansson_config.h.in",
+              "status": "modified",
+              "additions": 4,
+              "deletions": 0,
+              "changes": 4
+            },
+            {
+              "filename": "src/load.c",
+              "status": "modified",
+              "additions": 10,
+              "deletions": 0,
+              "changes": 10
+            },
+            {
+              "filename": "test/suites/invalid/recursion-depth/error",
+              "status": "added",
+              "additions": 2,
+              "deletions": 0,
+              "changes": 2
+            },
+            {
+              "filename": "test/suites/invalid/recursion-depth/input",
+              "status": "added",
+              "additions": 1,
+              "deletions": 0,
+              "changes": 1
+            }
+          ]
+        }
+      },
+      "references": [
+        "http://www.debian.org/security/2015/dsa-3577",
+        "http://www.openwall.com/lists/oss-security/2016/05/01/5",
+        "http://www.openwall.com/lists/oss-security/2016/05/02/1",
+        "http://www.openwall.com/lists/oss-security/2016/05/03/3",
+        "https://github.com/akheron/jansson/issues/282",
+        "https://github.com/akheron/jansson/pull/284",
+        "https://github.com/akheron/jansson/pull/284/commits/64ce0ad3731ebd77e02897b07920eadd0e2cc318",
+        "https://security-tracker.debian.org/tracker/CVE-2016-4425",
+        "https://ubuntu.com/security/CVE-2016-4425",
+        "https://github.com/akheron/jansson/commit/64ce0ad3731ebd77e02897b07920eadd0e2cc318"
+      ]
+    },
+    {
+      "id": "CVE-2020-36325",
+      "summary": "An issue was discovered in Jansson through 2.13.1. Due to a parsing error in json_loads, there's an out-of-bounds read-access bug. NOTE: the vendor reports that this only occurs when a programmer fails to follow the API specification",
+      "current_state": {
+        "mitre_state": "PUBLISHED",
+        "nvd_vuln_status": "Modified",
+        "disputed": true
+      },
+      "affected_versions": {
+        "nvd_configurations": [
+          {
+            "nodes": [
+              {
+                "operator": "OR",
+                "negate": false,
+                "cpeMatch": [
+                  {
+                    "vulnerable": true,
+                    "criteria": "cpe:2.3:a:jansson_project:jansson:*:*:*:*:*:*:*:*",
+                    "versionEndIncluding": "2.13.1",
+                    "matchCriteriaId": "27E9E4DF-222C-4541-A512-2B5A4D9B5AD9"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "mitre_affected": [
+          {
+            "product": "n/a",
+            "vendor": "n/a",
+            "versions": [
+              {
+                "status": "affected",
+                "version": "n/a"
+              }
+            ]
+          }
+        ]
+      },
+      "source_texts": [
+        {
+          "source": "nvd_description",
+          "url": "https://nvd.nist.gov/vuln/detail/CVE-2020-36325",
+          "text": "An issue was discovered in Jansson through 2.13.1. Due to a parsing error in json_loads, there's an out-of-bounds read-access bug. NOTE: the vendor reports that this only occurs when a programmer fails to follow the API specification"
+        },
+        {
+          "source": "mitre_description",
+          "url": "https://www.cve.org/CVERecord?id=CVE-2020-36325",
+          "text": "An issue was discovered in Jansson through 2.13.1. Due to a parsing error in json_loads, there's an out-of-bounds read-access bug. NOTE: the vendor reports that this only occurs when a programmer fails to follow the API specification"
+        },
+        {
+          "source": "debian_tracker_page",
+          "url": "https://security-tracker.debian.org/tracker/CVE-2020-36325",
+          "text": "CVE-2020-36325     CVE-2020-36325      Name   CVE-2020-36325     Description   An issue was discovered in Jansson through 2.13.1. Due to a parsing error in json_loads, there's an out-of-bounds read-access bug. NOTE: the vendor reports that this only occurs when a programmer fails to follow the API specification     Source    CVE  (at  NVD ;  CERT ,  ENISA ,  LWN ,  oss-sec ,  fulldisc ,  Debian ELTS ,  Red Hat ,  Ubuntu ,  Gentoo , SUSE  bugzilla / CVE , GitHub  advisories / code / issues ,  web search ,  more )    Vulnerable and fixed packages  The table below lists information on source packages.    Source Package  Release  Version  Status     jansson  ( PTS )  bullseye   2.13.1-1.1    vulnerable       forky, sid, bookworm, trixie   2.14-2    vulnerable     The information below is based on the following data on fixed versions.    Package  Type  Release  Fixed Version  Urgency  Origin  Debian Bugs     jansson   source  (unstable)   (unfixed)   unimportant        Notes   https://github.com/akheron/jansson/issues/548   Disputed security impact (only if programmer fails to follow API specifications)     Search for package or bug name:     Reporting problems     Home  -  Debian Security  -  Source   (Git)"
+        },
+        {
+          "source": "ubuntu_security_tracker",
+          "url": "https://ubuntu.com/security/CVE-2020-36325",
+          "text": "Ubuntu CVE status: active\nDescription:\nAn issue was discovered in Jansson through 2.13.1. Due to a parsing error\nin json_loads, there's an out-of-bounds read-access bug. NOTE: the vendor\nreports that this only occurs when a programmer fails to follow the API\nspecification\n\nPer-release statuses:\n- bionic: not-affected\n- focal: not-affected\n- groovy: not-affected\n- hirsute: not-affected\n- upstream: needs-triage\n- trusty: not-affected disputed\n- xenial: not-affected\n- jammy: not-affected\n- kinetic: not-affected\n- lunar: not-affected\n- mantic: not-affected\n- noble: not-affected\n- oracular: not-affected"
+        },
+        {
+          "source": "github_issue",
+          "url": "https://github.com/akheron/jansson/issues/548",
+          "text": "Title: OOB Read memory corruption bug\nURL: https://github.com/akheron/jansson/issues/548\n\nHi,\r\n\r\nI encountered an OOB read memory corruption bug when fuzzing Jansson.\r\n\r\nBelow you can find the crash log:\r\n```\r\n# ./prog -detect_leaks=0\r\nINFO: Seed: 665849601\r\nINFO: Loaded 1 modules   (10 inline 8-bit counters): 10 [0x5a3f90, 0x5a3f9a),\r\nINFO: Loaded 1 PC tables (10 PCs): 10 [0x568020,0x5680c0),\r\nINFO: -max_len is not provided; libFuzzer will not generate inputs larger than 4096 bytes\r\nINFO: A corpus is not provided, starting from an empty corpus\r\n#2      INITED cov: 3 ft: 4 corp: 1/1b exec/s: 0 rss: 27Mb\r\n#19711  NEW    cov: 6 ft: 7 corp: 2/4b lim: 198 exec/s: 0 rss: 47Mb L: 3/3 MS: 4 InsertByte-InsertByte-ShuffleBytes-ShuffleBytes-\r\n#19777  REDUCE cov: 6 ft: 7 corp: 2/3b lim: 198 exec/s: 0 rss: 47Mb L: 2/2 MS: 1 EraseBytes-\r\n#524288 pulse  cov: 6 ft: 7 corp: 2/3b lim: 4096 exec/s: 262144 rss: 610Mb\r\n#1048576        pulse  cov: 6 ft: 7 corp: 2/3b lim: 4096 exec/s: 262144 rss: 658Mb\r\n#2097152        pulse  cov: 6 ft: 7 corp: 2/3b lim: 4096 exec/s: 262144 rss: 659Mb\r\n#4194304        pulse  cov: 6 ft: 7 corp: 2/3b lim: 4096 exec/s: 262144 rss: 659Mb\r\n#8388608        pulse  cov: 6 ft: 7 corp: 2/3b lim: 4096 exec/s: 262144 rss: 659Mb\r\n#16777216       pulse  cov: 6 ft: 7 corp: 2/3b lim: 4096 exec/s: 254200 rss: 659Mb\r\n#33554432       pulse  cov: 6 ft: 7 corp: 2/3b lim: 4096 exec/s: 252288 rss: 659Mb\r\n#67108864       pulse  cov: 6 ft: 7 corp: 2/3b lim: 4096 exec/s: 246723 rss: 659Mb\r\n#134217728      pulse  cov: 6 ft: 7 corp: 2/3b lim: 4096 exec/s: 241833 rss: 659Mb\r\nAddressSanitizer:DEADLYSIGNAL\r\n=================================================================\r\n==1898031==ERROR: AddressSanitizer: SEGV on unknown address 0x610000050000 (pc 0x7f229f4f020b bp 0x7ffcf5010a30 sp 0x7ffcf5010938 T0)\r\n==1898031==The signal is caused by a READ memory access.\r\n    #0 0x7f229f4f020b in string_get /root/jansson-2.13/src/load.c:893:7\r\n    #1 0x7f229f4f06f3 in stream_get.part.0 /root/jansson-2.13/src/load.c:158:13\r\n    #2 0x7f229f4f0837 in stream_get /root/jansson-2.13/src/load.c:154:8\r\n    #3 0x7f229f4f0837 in lex_get_save /root/jansson-2.13/src/load.c:233:13\r\n    #4 0x7f229f4f0a32 in lex_scan /root/jansson-2.13/src/load.c:604:17\r\n    #5 0x7f229f4f15da in parse_json.constprop.0 /root/jansson-2.13/src/load.c:868:9\r\n    #6 0x7f229f4f1721 in json_loads /root/jansson-2.13/src/load.c:920:14\r\n    #7 0x54dad3 in LLVMFuzzerTestOneInput /root/fuzzing/jansson/fuzz.c:12:9\r\n    #8 0x4586a1 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) (/root/fuzzing/jansson/prog+0x4586a1)\r\n    #9 0x457de5 in fuzzer::Fuzzer::RunOne(unsigned char const*, unsigned long, bool, fuzzer::InputInfo*, bool*) (/root/fuzzing/jansson/prog+0x457de5)\r\n    #10 0x45a087 in fuzzer::Fuzzer::MutateAndTestOne() (/root/fuzzing/jansson/prog+0x45a087)\r\n    #11 0x45ad85 in fuzzer::Fuzzer::Loop(std::__Fuzzer::vector<fuzzer::SizedFile, fuzzer::fuzzer_allocator<fuzzer::SizedFile> >&) (/root/fuzzing/jansson/prog+0x45ad85)\r\n    #12 0x44973e in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) (/root/fuzzing/jansson/prog+0x44973e)\r\n    #13 0x472582 in main (/root/fuzzing/jansson/prog+0x472582)                                                                                                                                                  #14 0x7f229f1810b2 in __libc_start_main /build/glibc-YYA7BZ/glibc-2.31/csu/../csu/libc-start.c:308:16\r\n    #15 0x41e4dd in _start (/root/fuzzing/jansson/prog+0x41e4dd)\r\nAddressSanitizer can not provide additional info.\r\nSUMMARY: AddressSanitizer: SEGV /root/jansson-2.13/src/load.c:893:7 in string_get\r\n==1898031==ABORTING\r\nMS: 2 InsertRepeatedBytes-CopyPart-; base unit: 97d170e1550eee4afc0af065b78cda302a97674c\r\n0x5b,0x5d,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67\r\n,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x6\r\n7,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x\r\n67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0\r\nx67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,\r\n[]gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg\r\nartifact_prefix='./'; Test unit written to ./crash-76b9ab07b593b8511d24aea00b925d60735e9d6c\r\nBase64: W11nZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dn\r\nZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dn\r\n```\r\n\r\nThe fuzzer I used was:\r\n```\r\n#include <jansson.h>\r\n#include <stdio.h>\r\n\r\nint LLVMFuzzerTestOneInput(const char *Data, size_t Size) {\r\n        FILE *devNull;\r\n\r\n        devNull = fopen(\"/dev/null\", \"w\");\r\n\r\n        json_t *root;\r\n        json_error_t error;\r\n\r\n        root = json_loads(Data, 0, &error);\r\n\r\n        json_dumpf(root, devNull, 0);\r\n        json_decref(root);\r\n\r\n        fclose(devNull);\r\n\r\n        return 0;\r\n}\r\n```\r\n\r\nKind Regards,\r\n\r\nJordy Zomer"
+        },
+        {
+          "source": "github_issue_comments",
+          "url": "https://github.com/akheron/jansson/issues/548",
+          "text": "carnil @ 2021-04-26T20:16:16Z\nThis issue appears to have been assigned CVE-2020-36325.\n\nDavidKorczynski @ 2021-04-27T23:14:52Z\nThis is not a bug. `json_loads` expects a null-terminated string - the above fuzzer is invalid as it does not ensure proper null-termination. This is how a lot of C functions operate: think `strlen` - or basically any other function in `string.h` - you will find OOBs all over libc if you don't provide null-terminated strings. \r\n\r\nIf this was really assigned a CVE I recon it should be retracted.\n\nakheron @ 2021-04-28T03:19:21Z\nThanks for the analysis @DavidKorczynski\n\ncarnil @ 2021-04-28T04:10:11Z\nThanks @DavidKorczynski for the analysis. In this case probably the\nCVE should be rejected. Note I was not the one requesting int but just\nsent a request to reject it via https://cveform.mitre.org/\n\ncarnil @ 2021-04-28T19:12:19Z\n@DavidKorczynski FTR it got not REJECTED but now marked as \"disputed\", cf. https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2020-36325\n\nDavidKorczynski @ 2021-04-28T19:15:52Z\nInteresting, thanks for the update! I wonder how this plays out - I would think the CVE team must have some means of handling false positives in particular with memory unsafe languages and libraries.\n\nDavidKorczynski @ 2021-04-28T19:19:37Z\nFor reference \"_When one party disagrees with another party's assertion that a particular issue in software is a vulnerability, a CVE Record assigned to that issue may be designated as being \"DISPUTED\". In these cases, **the CVE Program is making no determination as to which party is correct**._\" from here https://cve.mitre.org/about/faqs.html#disputed_signify_in_cve_record \r\n\r\nHowever, in this case it seems rejected is the correct classification: \r\n\"_A CVE Record listed as \"REJECT\" is a CVE Record that is not accepted as a CVE Record. The reason a CVE Record is marked REJECT will most often be stated in the description of the CVE Record. Possible examples include it being a duplicate CVE Record, it being withdrawn by the original requester, **it being assigned incorrectly**, or some other administrative reason._\" from the same URL.\n\nDavidKorczynski @ 2021-04-28T19:21:10Z\nAnyways - issue is closed and it's no big deal.\n\nvtamara @ 2022-08-01T11:27:10Z\nIt is well known that functions like strlen that depend on null-terminated strings exclusively are not safe.  But what about improving the API of jansson? `json_loads` could receive a fourth parameter with the maximal length of the parameter data."
+        }
+      ],
+      "raw_records": {
+        "nvd": {
+          "id": "CVE-2020-36325",
+          "sourceIdentifier": "cve@mitre.org",
+          "published": "2021-04-26T18:15:07.493",
+          "lastModified": "2024-11-21T05:29:17.143",
+          "vulnStatus": "Modified",
+          "cveTags": [
+            {
+              "sourceIdentifier": "cve@mitre.org",
+              "tags": [
+                "disputed"
+              ]
+            }
+          ],
+          "descriptions": [
+            {
+              "lang": "en",
+              "value": "An issue was discovered in Jansson through 2.13.1. Due to a parsing error in json_loads, there's an out-of-bounds read-access bug. NOTE: the vendor reports that this only occurs when a programmer fails to follow the API specification"
+            },
+            {
+              "lang": "es",
+              "value": "** EN DISPUTA ** Se detect\u00f3 un problema en Jansson versiones hasta 2.13.1. Debido a un bug de an\u00e1lisis en json_loads, se presenta un bug de acceso de lectura fuera de l\u00edmites. NOTA: el proveedor informa de que esto s\u00f3lo ocurre cuando un programador no sigue la especificaci\u00f3n de la API"
+            }
+          ],
+          "metrics": {
+            "cvssMetricV31": [
+              {
+                "source": "nvd@nist.gov",
+                "type": "Primary",
+                "cvssData": {
+                  "version": "3.1",
+                  "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+                  "baseScore": 7.5,
+                  "baseSeverity": "HIGH",
+                  "attackVector": "NETWORK",
+                  "attackComplexity": "LOW",
+                  "privilegesRequired": "NONE",
+                  "userInteraction": "NONE",
+                  "scope": "UNCHANGED",
+                  "confidentialityImpact": "NONE",
+                  "integrityImpact": "NONE",
+                  "availabilityImpact": "HIGH"
+                },
+                "exploitabilityScore": 3.9,
+                "impactScore": 3.6
+              }
+            ],
+            "cvssMetricV2": [
+              {
+                "source": "nvd@nist.gov",
+                "type": "Primary",
+                "cvssData": {
+                  "version": "2.0",
+                  "vectorString": "AV:N/AC:L/Au:N/C:N/I:N/A:P",
+                  "baseScore": 5.0,
+                  "accessVector": "NETWORK",
+                  "accessComplexity": "LOW",
+                  "authentication": "NONE",
+                  "confidentialityImpact": "NONE",
+                  "integrityImpact": "NONE",
+                  "availabilityImpact": "PARTIAL"
+                },
+                "baseSeverity": "MEDIUM",
+                "exploitabilityScore": 10.0,
+                "impactScore": 2.9,
+                "acInsufInfo": false,
+                "obtainAllPrivilege": false,
+                "obtainUserPrivilege": false,
+                "obtainOtherPrivilege": false,
+                "userInteractionRequired": false
+              }
+            ]
+          },
+          "weaknesses": [
+            {
+              "source": "nvd@nist.gov",
+              "type": "Primary",
+              "description": [
+                {
+                  "lang": "en",
+                  "value": "CWE-125"
+                }
+              ]
+            }
+          ],
+          "configurations": [
+            {
+              "nodes": [
+                {
+                  "operator": "OR",
+                  "negate": false,
+                  "cpeMatch": [
+                    {
+                      "vulnerable": true,
+                      "criteria": "cpe:2.3:a:jansson_project:jansson:*:*:*:*:*:*:*:*",
+                      "versionEndIncluding": "2.13.1",
+                      "matchCriteriaId": "27E9E4DF-222C-4541-A512-2B5A4D9B5AD9"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "references": [
+            {
+              "url": "https://github.com/akheron/jansson/issues/548",
+              "source": "cve@mitre.org",
+              "tags": [
+                "Exploit",
+                "Third Party Advisory"
+              ]
+            },
+            {
+              "url": "https://github.com/akheron/jansson/issues/548",
+              "source": "af854a3a-2127-422b-91ae-364da2661108",
+              "tags": [
+                "Exploit",
+                "Third Party Advisory"
+              ]
+            }
+          ]
+        },
+        "mitre_cveawg": {
+          "containers": {
+            "cna": {
+              "affected": [
+                {
+                  "product": "n/a",
+                  "vendor": "n/a",
+                  "versions": [
+                    {
+                      "status": "affected",
+                      "version": "n/a"
+                    }
+                  ]
+                }
+              ],
+              "descriptions": [
+                {
+                  "lang": "en",
+                  "value": "An issue was discovered in Jansson through 2.13.1. Due to a parsing error in json_loads, there's an out-of-bounds read-access bug. NOTE: the vendor reports that this only occurs when a programmer fails to follow the API specification"
+                }
+              ],
+              "problemTypes": [
+                {
+                  "descriptions": [
+                    {
+                      "description": "n/a",
+                      "lang": "en",
+                      "type": "text"
+                    }
+                  ]
+                }
+              ],
+              "providerMetadata": {
+                "dateUpdated": "2021-04-28T06:00:01.000Z",
+                "orgId": "8254265b-2729-46b6-b9e3-3dfca2d5bfca",
+                "shortName": "mitre"
+              },
+              "references": [
+                {
+                  "tags": [
+                    "x_refsource_MISC"
+                  ],
+                  "url": "https://github.com/akheron/jansson/issues/548"
+                }
+              ],
+              "tags": [
+                "disputed"
+              ],
+              "x_legacyV4Record": {
+                "CVE_data_meta": {
+                  "ASSIGNER": "cve@mitre.org",
+                  "ID": "CVE-2020-36325",
+                  "STATE": "PUBLIC"
+                },
+                "affects": {
+                  "vendor": {
+                    "vendor_data": [
+                      {
+                        "product": {
+                          "product_data": [
+                            {
+                              "product_name": "n/a",
+                              "version": {
+                                "version_data": [
+                                  {
+                                    "version_value": "n/a"
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        },
+                        "vendor_name": "n/a"
+                      }
+                    ]
+                  }
+                },
+                "data_format": "MITRE",
+                "data_type": "CVE",
+                "data_version": "4.0",
+                "description": {
+                  "description_data": [
+                    {
+                      "lang": "eng",
+                      "value": "** DISPUTED ** An issue was discovered in Jansson through 2.13.1. Due to a parsing error in json_loads, there's an out-of-bounds read-access bug. NOTE: the vendor reports that this only occurs when a programmer fails to follow the API specification."
+                    }
+                  ]
+                },
+                "problemtype": {
+                  "problemtype_data": [
+                    {
+                      "description": [
+                        {
+                          "lang": "eng",
+                          "value": "n/a"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "references": {
+                  "reference_data": [
+                    {
+                      "name": "https://github.com/akheron/jansson/issues/548",
+                      "refsource": "MISC",
+                      "url": "https://github.com/akheron/jansson/issues/548"
+                    }
+                  ]
+                }
+              }
+            },
+            "adp": [
+              {
+                "providerMetadata": {
+                  "orgId": "af854a3a-2127-422b-91ae-364da2661108",
+                  "shortName": "CVE",
+                  "dateUpdated": "2024-08-04T17:23:10.468Z"
+                },
+                "title": "CVE Program Container",
+                "references": [
+                  {
+                    "tags": [
+                      "x_refsource_MISC",
+                      "x_transferred"
+                    ],
+                    "url": "https://github.com/akheron/jansson/issues/548"
+                  }
+                ]
+              }
+            ]
+          },
+          "cveMetadata": {
+            "assignerOrgId": "8254265b-2729-46b6-b9e3-3dfca2d5bfca",
+            "assignerShortName": "mitre",
+            "cveId": "CVE-2020-36325",
+            "datePublished": "2021-04-26T17:05:28.000Z",
+            "dateReserved": "2021-04-26T00:00:00.000Z",
+            "dateUpdated": "2024-08-04T17:23:10.468Z",
+            "state": "PUBLISHED"
+          },
+          "dataType": "CVE_RECORD",
+          "dataVersion": "5.1"
+        },
+        "ubuntu_security": {
+          "id": "CVE-2020-36325",
+          "published": "2021-04-26T18:15:00",
+          "updated_at": "2025-08-04T19:35:22.210877+00:00",
+          "description": "\nAn issue was discovered in Jansson through 2.13.1. Due to a parsing error\nin json_loads, there's an out-of-bounds read-access bug. NOTE: the vendor\nreports that this only occurs when a programmer fails to follow the API\nspecification",
+          "ubuntu_description": "",
+          "notes": [
+            {
+              "author": "mdeslaur",
+              "note": "this was an issue in the fuzzer code, not in the library itself\nhttps://github.com/akheron/jansson/issues/548#issuecomment-828007511\ndisputed by upstream, marking as not-affected"
+            }
+          ],
+          "codename": null,
+          "priority": "medium",
+          "cvss3": 7.5,
+          "impact": {
+            "baseMetricV3": {
+              "cvssV3": {
+                "version": "3.1",
+                "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+                "attackVector": "NETWORK",
+                "attackComplexity": "LOW",
+                "privilegesRequired": "NONE",
+                "userInteraction": "NONE",
+                "scope": "UNCHANGED",
+                "confidentialityImpact": "NONE",
+                "integrityImpact": "NONE",
+                "availabilityImpact": "HIGH",
+                "baseScore": 7.5,
+                "baseSeverity": "HIGH"
+              }
+            }
+          },
+          "status": "active",
+          "mitigation": "",
+          "references": [
+            "https://github.com/akheron/jansson/issues/548",
+            "https://www.cve.org/CVERecord?id=CVE-2020-36325"
+          ],
+          "bugs": [
+            ""
+          ],
+          "patches": {
+            "jansson": []
+          },
+          "tags": {},
+          "packages": [
+            {
+              "name": "jansson",
+              "source": "https://ubuntu.com/security/cve?package=jansson",
+              "ubuntu": "https://packages.ubuntu.com/search?suite=all&section=all&arch=any&searchon=sourcenames&keywords=jansson",
+              "debian": "https://tracker.debian.org/pkg/jansson",
+              "statuses": [
+                {
+                  "release_codename": "bionic",
+                  "status": "not-affected",
+                  "description": "",
+                  "component": null,
+                  "pocket": "security"
+                },
+                {
+                  "release_codename": "focal",
+                  "status": "not-affected",
+                  "description": "",
+                  "component": null,
+                  "pocket": "security"
+                },
+                {
+                  "release_codename": "groovy",
+                  "status": "not-affected",
+                  "description": "",
+                  "component": null,
+                  "pocket": "security"
+                },
+                {
+                  "release_codename": "hirsute",
+                  "status": "not-affected",
+                  "description": "",
+                  "component": null,
+                  "pocket": "security"
+                },
+                {
+                  "release_codename": "upstream",
+                  "status": "needs-triage",
+                  "description": "",
+                  "component": null,
+                  "pocket": "security"
+                },
+                {
+                  "release_codename": "trusty",
+                  "status": "not-affected",
+                  "description": "disputed",
+                  "component": null,
+                  "pocket": "security"
+                },
+                {
+                  "release_codename": "xenial",
+                  "status": "not-affected",
+                  "description": "",
+                  "component": null,
+                  "pocket": "security"
+                },
+                {
+                  "release_codename": "jammy",
+                  "status": "not-affected",
+                  "description": "",
+                  "component": null,
+                  "pocket": "security"
+                },
+                {
+                  "release_codename": "kinetic",
+                  "status": "not-affected",
+                  "description": "",
+                  "component": null,
+                  "pocket": "security"
+                },
+                {
+                  "release_codename": "lunar",
+                  "status": "not-affected",
+                  "description": "",
+                  "component": null,
+                  "pocket": "security"
+                },
+                {
+                  "release_codename": "mantic",
+                  "status": "not-affected",
+                  "description": "",
+                  "component": null,
+                  "pocket": "security"
+                },
+                {
+                  "release_codename": "noble",
+                  "status": "not-affected",
+                  "description": "",
+                  "component": null,
+                  "pocket": "security"
+                },
+                {
+                  "release_codename": "oracular",
+                  "status": "not-affected",
+                  "description": "",
+                  "component": null,
+                  "pocket": "security"
+                }
+              ]
+            }
+          ],
+          "notices_ids": [],
+          "notices": []
+        },
+        "debian_tracker_page_text": "CVE-2020-36325     CVE-2020-36325      Name   CVE-2020-36325     Description   An issue was discovered in Jansson through 2.13.1. Due to a parsing error in json_loads, there's an out-of-bounds read-access bug. NOTE: the vendor reports that this only occurs when a programmer fails to follow the API specification     Source    CVE  (at  NVD ;  CERT ,  ENISA ,  LWN ,  oss-sec ,  fulldisc ,  Debian ELTS ,  Red Hat ,  Ubuntu ,  Gentoo , SUSE  bugzilla / CVE , GitHub  advisories / code / issues ,  web search ,  more )    Vulnerable and fixed packages  The table below lists information on source packages.    Source Package  Release  Version  Status     jansson  ( PTS )  bullseye   2.13.1-1.1    vulnerable       forky, sid, bookworm, trixie   2.14-2    vulnerable     The information below is based on the following data on fixed versions.    Package  Type  Release  Fixed Version  Urgency  Origin  Debian Bugs     jansson   source  (unstable)   (unfixed)   unimportant        Notes   https://github.com/akheron/jansson/issues/548   Disputed security impact (only if programmer fails to follow API specifications)     Search for package or bug name:     Reporting problems     Home  -  Debian Security  -  Source   (Git)",
+        "github_issue": {
+          "html_url": "https://github.com/akheron/jansson/issues/548",
+          "title": "OOB Read memory corruption bug",
+          "state": "closed",
+          "created_at": "2020-09-01T16:46:51Z",
+          "updated_at": "2022-08-01T11:27:50Z",
+          "body": "Hi,\r\n\r\nI encountered an OOB read memory corruption bug when fuzzing Jansson.\r\n\r\nBelow you can find the crash log:\r\n```\r\n# ./prog -detect_leaks=0\r\nINFO: Seed: 665849601\r\nINFO: Loaded 1 modules   (10 inline 8-bit counters): 10 [0x5a3f90, 0x5a3f9a),\r\nINFO: Loaded 1 PC tables (10 PCs): 10 [0x568020,0x5680c0),\r\nINFO: -max_len is not provided; libFuzzer will not generate inputs larger than 4096 bytes\r\nINFO: A corpus is not provided, starting from an empty corpus\r\n#2      INITED cov: 3 ft: 4 corp: 1/1b exec/s: 0 rss: 27Mb\r\n#19711  NEW    cov: 6 ft: 7 corp: 2/4b lim: 198 exec/s: 0 rss: 47Mb L: 3/3 MS: 4 InsertByte-InsertByte-ShuffleBytes-ShuffleBytes-\r\n#19777  REDUCE cov: 6 ft: 7 corp: 2/3b lim: 198 exec/s: 0 rss: 47Mb L: 2/2 MS: 1 EraseBytes-\r\n#524288 pulse  cov: 6 ft: 7 corp: 2/3b lim: 4096 exec/s: 262144 rss: 610Mb\r\n#1048576        pulse  cov: 6 ft: 7 corp: 2/3b lim: 4096 exec/s: 262144 rss: 658Mb\r\n#2097152        pulse  cov: 6 ft: 7 corp: 2/3b lim: 4096 exec/s: 262144 rss: 659Mb\r\n#4194304        pulse  cov: 6 ft: 7 corp: 2/3b lim: 4096 exec/s: 262144 rss: 659Mb\r\n#8388608        pulse  cov: 6 ft: 7 corp: 2/3b lim: 4096 exec/s: 262144 rss: 659Mb\r\n#16777216       pulse  cov: 6 ft: 7 corp: 2/3b lim: 4096 exec/s: 254200 rss: 659Mb\r\n#33554432       pulse  cov: 6 ft: 7 corp: 2/3b lim: 4096 exec/s: 252288 rss: 659Mb\r\n#67108864       pulse  cov: 6 ft: 7 corp: 2/3b lim: 4096 exec/s: 246723 rss: 659Mb\r\n#134217728      pulse  cov: 6 ft: 7 corp: 2/3b lim: 4096 exec/s: 241833 rss: 659Mb\r\nAddressSanitizer:DEADLYSIGNAL\r\n=================================================================\r\n==1898031==ERROR: AddressSanitizer: SEGV on unknown address 0x610000050000 (pc 0x7f229f4f020b bp 0x7ffcf5010a30 sp 0x7ffcf5010938 T0)\r\n==1898031==The signal is caused by a READ memory access.\r\n    #0 0x7f229f4f020b in string_get /root/jansson-2.13/src/load.c:893:7\r\n    #1 0x7f229f4f06f3 in stream_get.part.0 /root/jansson-2.13/src/load.c:158:13\r\n    #2 0x7f229f4f0837 in stream_get /root/jansson-2.13/src/load.c:154:8\r\n    #3 0x7f229f4f0837 in lex_get_save /root/jansson-2.13/src/load.c:233:13\r\n    #4 0x7f229f4f0a32 in lex_scan /root/jansson-2.13/src/load.c:604:17\r\n    #5 0x7f229f4f15da in parse_json.constprop.0 /root/jansson-2.13/src/load.c:868:9\r\n    #6 0x7f229f4f1721 in json_loads /root/jansson-2.13/src/load.c:920:14\r\n    #7 0x54dad3 in LLVMFuzzerTestOneInput /root/fuzzing/jansson/fuzz.c:12:9\r\n    #8 0x4586a1 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) (/root/fuzzing/jansson/prog+0x4586a1)\r\n    #9 0x457de5 in fuzzer::Fuzzer::RunOne(unsigned char const*, unsigned long, bool, fuzzer::InputInfo*, bool*) (/root/fuzzing/jansson/prog+0x457de5)\r\n    #10 0x45a087 in fuzzer::Fuzzer::MutateAndTestOne() (/root/fuzzing/jansson/prog+0x45a087)\r\n    #11 0x45ad85 in fuzzer::Fuzzer::Loop(std::__Fuzzer::vector<fuzzer::SizedFile, fuzzer::fuzzer_allocator<fuzzer::SizedFile> >&) (/root/fuzzing/jansson/prog+0x45ad85)\r\n    #12 0x44973e in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) (/root/fuzzing/jansson/prog+0x44973e)\r\n    #13 0x472582 in main (/root/fuzzing/jansson/prog+0x472582)                                                                                                                                                  #14 0x7f229f1810b2 in __libc_start_main /build/glibc-YYA7BZ/glibc-2.31/csu/../csu/libc-start.c:308:16\r\n    #15 0x41e4dd in _start (/root/fuzzing/jansson/prog+0x41e4dd)\r\nAddressSanitizer can not provide additional info.\r\nSUMMARY: AddressSanitizer: SEGV /root/jansson-2.13/src/load.c:893:7 in string_get\r\n==1898031==ABORTING\r\nMS: 2 InsertRepeatedBytes-CopyPart-; base unit: 97d170e1550eee4afc0af065b78cda302a97674c\r\n0x5b,0x5d,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67\r\n,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x6\r\n7,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x\r\n67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0\r\nx67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,0x67,\r\n[]gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg\r\nartifact_prefix='./'; Test unit written to ./crash-76b9ab07b593b8511d24aea00b925d60735e9d6c\r\nBase64: W11nZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dn\r\nZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dn\r\n```\r\n\r\nThe fuzzer I used was:\r\n```\r\n#include <jansson.h>\r\n#include <stdio.h>\r\n\r\nint LLVMFuzzerTestOneInput(const char *Data, size_t Size) {\r\n        FILE *devNull;\r\n\r\n        devNull = fopen(\"/dev/null\", \"w\");\r\n\r\n        json_t *root;\r\n        json_error_t error;\r\n\r\n        root = json_loads(Data, 0, &error);\r\n\r\n        json_dumpf(root, devNull, 0);\r\n        json_decref(root);\r\n\r\n        fclose(devNull);\r\n\r\n        return 0;\r\n}\r\n```\r\n\r\nKind Regards,\r\n\r\nJordy Zomer\r\n",
+          "labels": []
+        },
+        "github_issue_comments": [
+          {
+            "user": "carnil",
+            "created_at": "2021-04-26T20:16:16Z",
+            "updated_at": "2021-04-26T20:16:16Z",
+            "body": "This issue appears to have been assigned CVE-2020-36325."
+          },
+          {
+            "user": "DavidKorczynski",
+            "created_at": "2021-04-27T23:14:52Z",
+            "updated_at": "2021-04-27T23:25:37Z",
+            "body": "This is not a bug. `json_loads` expects a null-terminated string - the above fuzzer is invalid as it does not ensure proper null-termination. This is how a lot of C functions operate: think `strlen` - or basically any other function in `string.h` - you will find OOBs all over libc if you don't provide null-terminated strings. \r\n\r\nIf this was really assigned a CVE I recon it should be retracted. "
+          },
+          {
+            "user": "akheron",
+            "created_at": "2021-04-28T03:19:21Z",
+            "updated_at": "2021-04-28T03:19:21Z",
+            "body": "Thanks for the analysis @DavidKorczynski "
+          },
+          {
+            "user": "carnil",
+            "created_at": "2021-04-28T04:10:11Z",
+            "updated_at": "2021-04-28T04:10:11Z",
+            "body": "Thanks @DavidKorczynski for the analysis. In this case probably the\nCVE should be rejected. Note I was not the one requesting int but just\nsent a request to reject it via https://cveform.mitre.org/ \n"
+          },
+          {
+            "user": "carnil",
+            "created_at": "2021-04-28T19:12:19Z",
+            "updated_at": "2021-04-28T19:12:19Z",
+            "body": "@DavidKorczynski FTR it got not REJECTED but now marked as \"disputed\", cf. https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2020-36325"
+          },
+          {
+            "user": "DavidKorczynski",
+            "created_at": "2021-04-28T19:15:52Z",
+            "updated_at": "2021-04-28T19:16:04Z",
+            "body": "Interesting, thanks for the update! I wonder how this plays out - I would think the CVE team must have some means of handling false positives in particular with memory unsafe languages and libraries. "
+          },
+          {
+            "user": "DavidKorczynski",
+            "created_at": "2021-04-28T19:19:37Z",
+            "updated_at": "2021-04-28T19:20:40Z",
+            "body": "For reference \"_When one party disagrees with another party's assertion that a particular issue in software is a vulnerability, a CVE Record assigned to that issue may be designated as being \"DISPUTED\". In these cases, **the CVE Program is making no determination as to which party is correct**._\" from here https://cve.mitre.org/about/faqs.html#disputed_signify_in_cve_record \r\n\r\nHowever, in this case it seems rejected is the correct classification: \r\n\"_A CVE Record listed as \"REJECT\" is a CVE Record that is not accepted as a CVE Record. The reason a CVE Record is marked REJECT will most often be stated in the description of the CVE Record. Possible examples include it being a duplicate CVE Record, it being withdrawn by the original requester, **it being assigned incorrectly**, or some other administrative reason._\" from the same URL. "
+          },
+          {
+            "user": "DavidKorczynski",
+            "created_at": "2021-04-28T19:21:10Z",
+            "updated_at": "2021-04-28T19:21:10Z",
+            "body": "Anyways - issue is closed and it's no big deal. "
+          },
+          {
+            "user": "vtamara",
+            "created_at": "2022-08-01T11:27:10Z",
+            "updated_at": "2022-08-01T11:27:50Z",
+            "body": "It is well known that functions like strlen that depend on null-terminated strings exclusively are not safe.  But what about improving the API of jansson? `json_loads` could receive a fourth parameter with the maximal length of the parameter data."
+          }
+        ],
+        "github_pull_request": null,
+        "github_fix_commit": null
+      },
+      "references": [
+        "https://github.com/akheron/jansson/issues/548",
+        "https://security-tracker.debian.org/tracker/CVE-2020-36325",
+        "https://ubuntu.com/security/CVE-2020-36325"
+      ]
+    }
+  ],
+  "excluded_related_records": [
+    {
+      "id": "CVE-2024-39349",
+      "reason_excluded_from_upstream_set": "NVD explicitly says the vulnerable libjansson component does not affect the upstream library.",
+      "summary": "A vulnerability regarding buffer copy without checking size of input ('Classic Buffer Overflow') is found in the libjansson component and it does not affect the upstream library. This allows remote attackers to execute arbitrary code via unspecified vectors. The following models with Synology Camera Firmware versions before 1.0.7-0298 may be affected: BC500 and TC500.",
+      "raw_nvd_record": {
+        "id": "CVE-2024-39349",
+        "sourceIdentifier": "security@synology.com",
+        "published": "2024-06-28T06:15:05.500",
+        "lastModified": "2025-04-10T19:03:39.500",
+        "vulnStatus": "Analyzed",
+        "cveTags": [],
+        "descriptions": [
+          {
+            "lang": "en",
+            "value": "A vulnerability regarding buffer copy without checking size of input ('Classic Buffer Overflow') is found in the libjansson component and it does not affect the upstream library. This allows remote attackers to execute arbitrary code via unspecified vectors. The following models with Synology Camera Firmware versions before 1.0.7-0298 may be affected: BC500 and TC500."
+          },
+          {
+            "lang": "es",
+            "value": "Se encuentra una vulnerabilidad con respecto a la copia del b\u00fafer sin verificar el tama\u00f1o de la entrada (\"Classic Buffer Overflow\") en el componente libjansson y no afecta a la librer\u00eda ascendente. Esto permite a atacantes remotos ejecutar c\u00f3digo arbitrario a trav\u00e9s de vectores no especificados. Los siguientes modelos con versiones de firmware de c\u00e1mara Synology anteriores a 1.0.7-0298 pueden verse afectados: BC500 y TC500."
+          }
+        ],
+        "metrics": {
+          "cvssMetricV31": [
+            {
+              "source": "security@synology.com",
+              "type": "Secondary",
+              "cvssData": {
+                "version": "3.1",
+                "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+                "baseScore": 9.8,
+                "baseSeverity": "CRITICAL",
+                "attackVector": "NETWORK",
+                "attackComplexity": "LOW",
+                "privilegesRequired": "NONE",
+                "userInteraction": "NONE",
+                "scope": "UNCHANGED",
+                "confidentialityImpact": "HIGH",
+                "integrityImpact": "HIGH",
+                "availabilityImpact": "HIGH"
+              },
+              "exploitabilityScore": 3.9,
+              "impactScore": 5.9
+            },
+            {
+              "source": "nvd@nist.gov",
+              "type": "Primary",
+              "cvssData": {
+                "version": "3.1",
+                "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+                "baseScore": 9.8,
+                "baseSeverity": "CRITICAL",
+                "attackVector": "NETWORK",
+                "attackComplexity": "LOW",
+                "privilegesRequired": "NONE",
+                "userInteraction": "NONE",
+                "scope": "UNCHANGED",
+                "confidentialityImpact": "HIGH",
+                "integrityImpact": "HIGH",
+                "availabilityImpact": "HIGH"
+              },
+              "exploitabilityScore": 3.9,
+              "impactScore": 5.9
+            }
+          ]
+        },
+        "weaknesses": [
+          {
+            "source": "security@synology.com",
+            "type": "Secondary",
+            "description": [
+              {
+                "lang": "en",
+                "value": "CWE-120"
+              }
+            ]
+          },
+          {
+            "source": "nvd@nist.gov",
+            "type": "Primary",
+            "description": [
+              {
+                "lang": "en",
+                "value": "CWE-120"
+              }
+            ]
+          }
+        ],
+        "configurations": [
+          {
+            "operator": "AND",
+            "nodes": [
+              {
+                "operator": "OR",
+                "negate": false,
+                "cpeMatch": [
+                  {
+                    "vulnerable": true,
+                    "criteria": "cpe:2.3:o:synology:bc500_firmware:*:*:*:*:*:*:*:*",
+                    "versionEndExcluding": "1.0.7-0298",
+                    "matchCriteriaId": "11106950-DFD0-441A-8DE3-DA19C15281B1"
+                  }
+                ]
+              },
+              {
+                "operator": "OR",
+                "negate": false,
+                "cpeMatch": [
+                  {
+                    "vulnerable": false,
+                    "criteria": "cpe:2.3:h:synology:bc500:-:*:*:*:*:*:*:*",
+                    "matchCriteriaId": "5FD618BD-29BD-4F43-9BEF-F73065247580"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "operator": "AND",
+            "nodes": [
+              {
+                "operator": "OR",
+                "negate": false,
+                "cpeMatch": [
+                  {
+                    "vulnerable": true,
+                    "criteria": "cpe:2.3:o:synology:tc500_firmware:*:*:*:*:*:*:*:*",
+                    "versionEndExcluding": "1.0.7-0298",
+                    "matchCriteriaId": "F4DBB838-E652-4C96-AC50-AF07510EF8E5"
+                  }
+                ]
+              },
+              {
+                "operator": "OR",
+                "negate": false,
+                "cpeMatch": [
+                  {
+                    "vulnerable": false,
+                    "criteria": "cpe:2.3:h:synology:tc500:-:*:*:*:*:*:*:*",
+                    "matchCriteriaId": "582C2C89-3351-4DC6-B40A-7E2E4CA6AFEA"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "references": [
+          {
+            "url": "https://www.synology.com/en-global/security/advisory/Synology_SA_23_15",
+            "source": "security@synology.com",
+            "tags": [
+              "Vendor Advisory"
+            ]
+          },
+          {
+            "url": "https://www.synology.com/en-global/security/advisory/Synology_SA_23_15",
+            "source": "af854a3a-2127-422b-91ae-364da2661108",
+            "tags": [
+              "Vendor Advisory"
+            ]
+          }
+        ]
+      },
+      "references": [
+        "https://www.synology.com/en-global/security/advisory/Synology_SA_23_15"
+      ]
+    }
+  ]
+}
