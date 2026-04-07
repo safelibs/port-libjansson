@@ -4,7 +4,7 @@
     "upstream_name": "Jansson",
     "upstream_repository": "https://github.com/akheron/jansson"
   },
-  "generated_at_utc": "2026-04-07T08:41:09Z",
+  "generated_at_utc": "2026-04-07T08:48:26Z",
   "as_of_date": "2026-04-07",
   "distribution": {
     "name": "Ubuntu",
@@ -75,6 +75,7 @@
         "README.md:9 lists RFC 7515 (JWS)",
         "README.md:10 lists RFC 7516 (JWE)",
         "README.md:11 lists RFC 7517 (JWK)",
+        "README.md:12 lists RFC 7518 (JWA)",
         "README.md:13 lists RFC 7519 (JWT)",
         "lib/misc.c:23 encode_protected(json_t *obj) rewrites protected JOSE headers",
         "lib/misc.c:48 calls json_object_seed(0)"
@@ -150,7 +151,7 @@
       "source_evidence": [
         "output/ulogd_output_JSON.c:3 describes a JSON logging target",
         "output/ulogd_output_JSON.c:41 defines the default file target /var/log/ulogd.json",
-        "output/ulogd_output_JSON.c:584 registers the JSON plugin"
+        "output/ulogd_output_JSON.c:604 registers the JSON plugin with ulogd_register_plugin"
       ]
     },
     {
