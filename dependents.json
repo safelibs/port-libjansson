@@ -1,0 +1,187 @@
+{
+  "project": {
+    "package_name": "libjansson",
+    "upstream_name": "Jansson",
+    "upstream_repository": "https://github.com/akheron/jansson"
+  },
+  "generated_at_utc": "2026-04-07T08:41:09Z",
+  "as_of_date": "2026-04-07",
+  "distribution": {
+    "name": "Ubuntu",
+    "release": "24.04",
+    "codename": "noble"
+  },
+  "selection_notes": {
+    "scope": "Non-exhaustive, deliberately diverse sample of Ubuntu 24.04 repository packages that directly runtime-depend on libjansson4.",
+    "method": [
+      "Confirmed package relationships locally on Ubuntu 24.04.3 LTS with apt-cache.",
+      "Inspected extracted Ubuntu source packages to identify the concrete runtime functionality that uses libjansson."
+    ]
+  },
+  "dependents": [
+    {
+      "software": "Emacs",
+      "binary_package": "emacs-nox",
+      "source_package": "emacs",
+      "category": "editor",
+      "dependency_kind": "runtime",
+      "dependency_package": "libjansson4",
+      "runtime_functionality": "Built-in JSON parsing and serialization exposed to Lisp, including json-serialize and json-parse-string.",
+      "source_evidence": [
+        "src/json.c:592 defines json-serialize",
+        "src/json.c:941 defines json-parse-string",
+        "lisp/subr.el:6971 defines json-available-p as a libjansson capability check"
+      ]
+    },
+    {
+      "software": "Janus Gateway",
+      "binary_package": "janus",
+      "source_package": "janus",
+      "category": "WebRTC gateway",
+      "dependency_kind": "runtime",
+      "dependency_package": "libjansson4",
+      "runtime_functionality": "HTTP control/admin API and event delivery parse JSON requests and emit JSON responses/events.",
+      "source_evidence": [
+        "src/transports/janus_http.c:1021 implements janus_http_send_message(json_t *message)",
+        "src/transports/janus_http.c:1623 serializes queued events with json_dumps",
+        "src/transports/janus_http.c:1652 sends application/json responses",
+        "src/transports/janus_http.c:1675 parses request payloads with json_loads"
+      ]
+    },
+    {
+      "software": "jshon",
+      "binary_package": "jshon",
+      "source_package": "jshon",
+      "category": "shell JSON tooling",
+      "dependency_kind": "runtime",
+      "dependency_package": "libjansson4",
+      "runtime_functionality": "Command-line JSON querying and editing from stdin/files, with optional JSONP stripping before parse and JSON emission after transformation.",
+      "source_evidence": [
+        "jshon.c:79 defines compat_json_loads",
+        "jshon.c:934 removes a JSONP callback before parsing when requested",
+        "jshon.c:937 parses input with compat_json_loads",
+        "jshon.c:1001 creates JSON string values for updates"
+      ]
+    },
+    {
+      "software": "jose",
+      "binary_package": "jose",
+      "source_package": "jose",
+      "category": "cryptographic toolkit",
+      "dependency_kind": "runtime",
+      "dependency_package": "libjansson4",
+      "runtime_functionality": "CLI and library support for JOSE JSON objects: JWS, JWE, JWK, JWA, and JWT processing.",
+      "source_evidence": [
+        "README.md:9 lists RFC 7515 (JWS)",
+        "README.md:10 lists RFC 7516 (JWE)",
+        "README.md:11 lists RFC 7517 (JWK)",
+        "README.md:13 lists RFC 7519 (JWT)",
+        "lib/misc.c:23 encode_protected(json_t *obj) rewrites protected JOSE headers",
+        "lib/misc.c:48 calls json_object_seed(0)"
+      ]
+    },
+    {
+      "software": "MTR",
+      "binary_package": "mtr-tiny",
+      "source_package": "mtr",
+      "category": "network diagnostics",
+      "dependency_kind": "runtime",
+      "dependency_package": "libjansson4",
+      "runtime_functionality": "JSON report output mode that emits hop-by-hop and summary network metrics as structured JSON.",
+      "source_evidence": [
+        "NEWS:93 says report JSON was reworked with libjansson",
+        "ui/report.c:296 implements json_close(struct mtr_ctl *ctl)",
+        "ui/report.c:384 writes the final report with json_dumpf"
+      ]
+    },
+    {
+      "software": "Suricata",
+      "binary_package": "suricata",
+      "source_package": "suricata",
+      "category": "intrusion detection",
+      "dependency_kind": "runtime",
+      "dependency_package": "libjansson4",
+      "runtime_functionality": "EVE JSON logging, including the default eve.json output and protocol-specific JSON event logging.",
+      "source_evidence": [
+        "src/output-json.c:23 says it logs detection and monitoring events in JSON format",
+        "src/output-json.c:75 sets the default log filename to eve.json",
+        "src/output-json.c:103 defines SCJsonString returning jansson json_t values"
+      ]
+    },
+    {
+      "software": "Tang",
+      "binary_package": "tang-common",
+      "source_package": "tang",
+      "category": "network-bound disk unlock server",
+      "dependency_kind": "runtime",
+      "dependency_package": "libjansson4",
+      "runtime_functionality": "Key advertisement and recovery endpoints emit application/jose+json, parse JSON recovery requests, and return application/jwk+json responses.",
+      "source_evidence": [
+        "src/tangd.c:93 serializes advertisements with json_dumps",
+        "src/tangd.c:98 replies with Content-Type: application/jose+json",
+        "src/tangd.c:123 parses request bodies with json_loads",
+        "src/tangd.c:167 performs JWK exchange via jose_jwk_exc",
+        "src/tangd.c:182 replies with Content-Type: application/jwk+json"
+      ]
+    },
+    {
+      "software": "teamd/libteam",
+      "binary_package": "libteam-utils",
+      "source_package": "libteam",
+      "category": "network link aggregation",
+      "dependency_kind": "runtime",
+      "dependency_package": "libjansson4",
+      "runtime_functionality": "teamdctl parses JSON status/configuration dumps and teamd serializes live daemon state as JSON.",
+      "source_evidence": [
+        "utils/teamdctl.c:80 parses JSON dumps with json_loads",
+        "utils/teamdctl.c:94 pretty-prints JSON dumps with json_dumps",
+        "utils/teamdctl.c:145 parses setup/state fields from JSON",
+        "teamd/teamd_state.c:475 serializes teamd state with json_dumps"
+      ]
+    },
+    {
+      "software": "ulogd2 JSON output plugin",
+      "binary_package": "ulogd2-json",
+      "source_package": "ulogd2",
+      "category": "firewall logging",
+      "dependency_kind": "runtime",
+      "dependency_package": "libjansson4",
+      "runtime_functionality": "Netfilter packet and flow logging to JSON files or sockets, with /var/log/ulogd.json as the default file target.",
+      "source_evidence": [
+        "output/ulogd_output_JSON.c:3 describes a JSON logging target",
+        "output/ulogd_output_JSON.c:41 defines the default file target /var/log/ulogd.json",
+        "output/ulogd_output_JSON.c:584 registers the JSON plugin"
+      ]
+    },
+    {
+      "software": "WayVNC",
+      "binary_package": "wayvnc",
+      "source_package": "wayvnc",
+      "category": "remote desktop server",
+      "dependency_kind": "runtime",
+      "dependency_package": "libjansson4",
+      "runtime_functionality": "JSON IPC control/events interface that parses requests, validates IDs, creates event objects, and packs responses.",
+      "source_evidence": [
+        "src/json-ipc.c:64 parses incoming JSON IPC requests",
+        "src/json-ipc.c:81 rejects invalid request IDs",
+        "src/json-ipc.c:109 creates JSON IPC events",
+        "src/json-ipc.c:191 packs JSON IPC responses"
+      ]
+    },
+    {
+      "software": "Webdis",
+      "binary_package": "webdis",
+      "source_package": "webdis",
+      "category": "Redis HTTP gateway",
+      "dependency_kind": "runtime",
+      "dependency_package": "libjansson4",
+      "runtime_functionality": "Converts Redis replies to JSON or JSONP over HTTP/WebSocket and parses JSON ACL/configuration data.",
+      "source_evidence": [
+        "src/formats/json.c:15 implements JSON HTTP replies",
+        "src/formats/json.c:40 sends application/json responses",
+        "src/formats/json.c:116 converts Redis reply structures into JSON",
+        "src/conf.c:141 parses ACL objects from JSON configuration"
+      ]
+    }
+  ]
+}
