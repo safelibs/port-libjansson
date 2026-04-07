@@ -224,6 +224,42 @@ static void error_code() {
         fail("json_loads returned incorrect error code");
 }
 
+static void additional_error_codes() {
+    json_error_t error;
+
+    if (json_loads("{'foo': 1}", 0, &error))
+        fail("json_loads accepted invalid object syntax");
+    if (json_error_code(&error) != json_error_invalid_syntax)
+        fail("json_loads returned wrong error code for invalid syntax");
+    if (strcmp(error.source, "<string>") != 0)
+        fail("json_loads returned wrong error source for invalid syntax");
+    if (error.line != 1 || error.column != 2 || error.position != 2)
+        fail("json_loads returned wrong location for invalid syntax");
+
+    if (json_loads("\"a\\u0000b\"", JSON_DECODE_ANY, &error))
+        fail("json_loads accepted a string containing NUL without JSON_ALLOW_NUL");
+    if (json_error_code(&error) != json_error_null_character)
+        fail("json_loads returned wrong error code for NUL string");
+    if (strcmp(error.source, "<string>") != 0)
+        fail("json_loads returned wrong error source for NUL string");
+    if (error.line != 1 || error.column != 10 || error.position != 10)
+        fail("json_loads returned wrong location for NUL string");
+
+    if (json_loads("{\"a\\u0000b\": 1}", 0, &error))
+        fail("json_loads accepted an object key containing NUL");
+    if (json_error_code(&error) != json_error_null_byte_in_key)
+        fail("json_loads returned wrong error code for NUL object key");
+    if (strcmp(error.source, "<string>") != 0)
+        fail("json_loads returned wrong error source for NUL object key");
+    if (error.line != 1 || error.column != 11 || error.position != 11)
+        fail("json_loads returned wrong location for NUL object key");
+
+    if (json_loads("{\"a\\u0000b\": 1}", JSON_ALLOW_NUL, &error))
+        fail("json_loads accepted an object key containing NUL with JSON_ALLOW_NUL");
+    if (json_error_code(&error) != json_error_null_byte_in_key)
+        fail("json_loads returned wrong error code for NUL object key with JSON_ALLOW_NUL");
+}
+
 static void run_tests() {
     file_not_found();
     very_long_file_name();
@@ -235,4 +271,5 @@ static void run_tests() {
     load_wrong_args();
     position();
     error_code();
+    additional_error_codes();
 }

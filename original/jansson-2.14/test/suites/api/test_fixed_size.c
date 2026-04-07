@@ -169,6 +169,62 @@ static void test_binary_keys(void) {
     json_decref(obj);
 }
 
+static void test_setn_and_keylen_foreach_safe(void) {
+    json_t *obj = json_object();
+    json_t *shared = json_string("shared");
+    const char key1[] = {'k', '1'};
+    const char key2[] = {'k', '\0', '2'};
+    const char key3[] = {'k', '3', '\0'};
+    const char *expected_keys[] = {key1, key2, key3};
+    const size_t expected_lengths[] = {sizeof(key1), sizeof(key2), sizeof(key3)};
+    const char *key;
+    size_t keylen;
+    size_t index = 0;
+    json_t *value;
+    void *iter;
+    void *tmp;
+
+    if (json_object_setn(obj, key1, sizeof(key1), shared))
+        fail("json_object_setn failed");
+
+    json_decref(shared);
+
+    if (!json_is_string(json_object_getn(obj, key1, sizeof(key1))))
+        fail("json_object_setn failed to incref its value");
+
+    if (json_object_setn_new_nocheck(obj, key2, sizeof(key2), json_integer(2)))
+        fail("json_object_setn_new_nocheck for key2 failed");
+    if (json_object_setn_new_nocheck(obj, key3, sizeof(key3), json_integer(3)))
+        fail("json_object_setn_new_nocheck for key3 failed");
+
+    iter = json_object_iter(obj);
+    if (!iter)
+        fail("json_object_iter failed for fixed-length keys");
+    if (json_object_iter_key_len(iter) != expected_lengths[0])
+        fail("json_object_iter_key_len returned an invalid length");
+    if (memcmp(json_object_iter_key(iter), expected_keys[0], expected_lengths[0]) != 0)
+        fail("json_object_iter_key returned an invalid key");
+
+    json_object_keylen_foreach_safe(obj, tmp, key, keylen, value) {
+        if (index >= 3)
+            fail("json_object_keylen_foreach_safe iterated too many items");
+        if (keylen != expected_lengths[index])
+            fail("json_object_keylen_foreach_safe returned an invalid key length");
+        if (memcmp(key, expected_keys[index], keylen) != 0)
+            fail("json_object_keylen_foreach_safe returned an invalid key");
+        if (json_object_deln(obj, key, keylen))
+            fail("json_object_keylen_foreach_safe did not allow deletion");
+        index++;
+    }
+
+    if (index != 3)
+        fail("json_object_keylen_foreach_safe missed keys");
+    if (json_object_size(obj) != 0)
+        fail("json_object_keylen_foreach_safe did not delete all keys");
+
+    json_decref(obj);
+}
+
 static void test_dump_order(void) {
     json_t *obj = json_object();
     char key1[] = {'k', '\0', '-', '2'};
@@ -201,5 +257,6 @@ static void run_tests() {
     test_keylen();
     test_invalid_keylen();
     test_binary_keys();
+    test_setn_and_keylen_foreach_safe();
     test_dump_order();
 }

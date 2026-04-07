@@ -11,6 +11,18 @@
 #include <stdio.h>
 #include <string.h>
 
+static int my_vunpack_ex(json_t *root, json_error_t *error, size_t flags,
+                         const char *fmt, ...) {
+    int result;
+    va_list ap;
+
+    va_start(ap, fmt);
+    result = json_vunpack_ex(root, error, flags, fmt, ap);
+    va_end(ap);
+
+    return result;
+}
+
 static void run_tests() {
     json_t *j, *j2;
     int i1, i2, i3;
@@ -125,6 +137,13 @@ static void run_tests() {
         fail("json_unpack simple object failed");
     json_decref(j);
 
+    /* simple object from va_list */
+    j = json_pack("{s:s,s:i}", "foo", "bar", "baz", 42);
+    rv = my_vunpack_ex(j, &error, 0, "{s:s,s:i}", "foo", &s, "baz", &i1);
+    if (rv || strcmp(s, "bar") || i1 != 42)
+        fail("json_vunpack_ex simple object failed");
+    json_decref(j);
+
     /* simple array */
     j = json_pack("[iii]", 1, 2, 3);
     rv = json_unpack(j, "[i,i,i]", &i1, &i2, &i3);
@@ -220,6 +239,11 @@ static void run_tests() {
     j2 = json_string("foo");
     if (!json_unpack_ex(j, &error, 0, "s"))
         fail("json_unpack failed to catch invalid type");
+    check_error(json_error_wrong_type, "Expected string, got integer", "<validation>", 1,
+                1, 1);
+
+    if (!my_vunpack_ex(j, &error, 0, "s", &s))
+        fail("json_vunpack_ex failed to catch invalid type");
     check_error(json_error_wrong_type, "Expected string, got integer", "<validation>", 1,
                 1, 1);
 

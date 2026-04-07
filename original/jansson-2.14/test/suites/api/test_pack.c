@@ -44,6 +44,17 @@ static void test_inifity() {
 }
 #endif // INFINITY
 
+static json_t *my_vpack_ex(json_error_t *error, size_t flags, const char *fmt, ...) {
+    json_t *value;
+    va_list ap;
+
+    va_start(ap, fmt);
+    value = json_vpack_ex(error, flags, fmt, ap);
+    va_end(ap);
+
+    return value;
+}
+
 static void run_tests() {
     json_t *value;
     int i;
@@ -232,6 +243,22 @@ static void run_tests() {
     if (!json_is_array(json_object_get(value, "foobarbaz")))
         fail("json_pack array failed");
     json_decref(value);
+
+    /* object from va_list */
+    value = my_vpack_ex(&error, 0, "{s:s,s:[ii]}", "greeting", "hello", "numbers", 1, 2);
+    if (!json_is_object(value) || json_object_size(value) != 2)
+        fail("json_vpack_ex object failed");
+    if (strcmp(json_string_value(json_object_get(value, "greeting")), "hello"))
+        fail("json_vpack_ex object string failed");
+    if (!json_is_array(json_object_get(value, "numbers")) ||
+        json_array_size(json_object_get(value, "numbers")) != 2)
+        fail("json_vpack_ex object array failed");
+    json_decref(value);
+
+    if (my_vpack_ex(&error, 0, "z"))
+        fail("json_vpack_ex succeeded with invalid format character");
+    check_error(json_error_invalid_format, "Unexpected format character 'z'", "<format>",
+                1, 1, 1);
 
     /* object with optional members */
     value = json_pack("{s:s,s:o,s:O}", "a", NULL, "b", NULL, "c", NULL);
