@@ -1,0 +1,75 @@
+{
+  "project": {
+    "package_name": "libjansson",
+    "upstream_name": "Jansson",
+    "upstream_repository": "https://github.com/akheron/jansson"
+  },
+  "generated_at_utc": "2026-04-07T07:51:21Z",
+  "as_of_date": "2026-04-07",
+  "source_file": "/home/yans/code/safelibs/ported/libjansson/all_cves.json",
+  "analysis_focus": "Non-memory-corruption CVEs that may still affect a Rust reimplementation of libjansson.",
+  "selection_criteria": {
+    "included_when": [
+      "The issue is present in the upstream Jansson CVE set gathered in all_cves.json.",
+      "The issue is not primarily a memory-corruption bug.",
+      "The failure mode can survive a Rust rewrite because it is algorithmic, parser-design, or API-behavior related."
+    ],
+    "excluded_when": [
+      "The issue is primarily memory corruption that Rust's ownership and bounds checks should eliminate in the core implementation.",
+      "The record is explicitly downstream-only and does not affect upstream Jansson."
+    ]
+  },
+  "relevant_cves": [
+    {
+      "id": "CVE-2013-6401",
+      "summary": "Jansson, possibly 2.4 and earlier, does not restrict the ability to trigger hash collisions predictably, which allows context-dependent attackers to cause a denial of service (CPU consumption) via a crafted JSON document.",
+      "vulnerability_class": "Algorithmic complexity denial of service via predictable hash collisions",
+      "why_relevant_to_rust": "Rust memory safety does not prevent hash-flooding attacks. A Rust port can reintroduce this if object keys are stored in a hash table with deterministic or attacker-predictable hashing. Using Rust's default randomized hashers substantially reduces the risk, but a custom hasher or deterministic map chosen for compatibility/performance could recreate the bug.",
+      "recommended_port_requirement": "Use keyed randomized hashing for JSON object keys by default, and avoid deterministic hashers for untrusted input unless there is separate collision hardening.",
+      "upstream_fix_context": {
+        "fixed_in_upstream_version": "2.6",
+        "fix_commit": "8f80c2d83808150724d31793e6ade92749b1faa4",
+        "fix_summary": "Changed the hash function and seeded hashes with random data when the first JSON object is created."
+      },
+      "supporting_evidence": [
+        "CVE text describes denial of service through predictable hash collisions and CPU consumption.",
+        "The upstream fix commit message says: Change hash function, randomize hashes.",
+        "The upstream CHANGES entry for 2.6 says the hashtable hash function was changed and automatically seeded with random data."
+      ]
+    },
+    {
+      "id": "CVE-2016-4425",
+      "summary": "Jansson 2.7 and earlier allows context-dependent attackers to cause a denial of service (deep recursion, stack consumption, and crash) via crafted JSON data.",
+      "vulnerability_class": "Uncontrolled recursion leading to stack exhaustion and denial of service",
+      "why_relevant_to_rust": "This issue is independent of C memory unsafety. A recursive-descent parser written in Rust can still overflow the call stack or abort on deeply nested arrays or objects. The problem remains unless the Rust port enforces a nesting limit or uses an explicit heap-based parsing stack.",
+      "recommended_port_requirement": "Enforce a maximum parse depth or implement parsing iteratively. Add regression tests for deeply nested arrays and objects that exceed the chosen limit.",
+      "upstream_fix_context": {
+        "fixed_in_upstream_version": "2.8",
+        "fix_commit": "64ce0ad3731ebd77e02897b07920eadd0e2cc318",
+        "fix_summary": "Limited recursion depth for arrays and objects with a configurable JSON_PARSER_MAX_DEPTH defaulting to 2048."
+      },
+      "supporting_evidence": [
+        "CVE text describes denial of service through deep recursion, stack consumption, and crash.",
+        "The upstream issue discussion identifies unlimited parse depth in array and object parsing as the root cause.",
+        "The fix commit message says the parser now limits recursion depth and sets a default maximum depth of 2048."
+      ]
+    }
+  ],
+  "excluded_after_analysis": [
+    {
+      "id": "CVE-2020-36325",
+      "summary": "An issue was discovered in Jansson through 2.13.1. Due to a parsing error in json_loads, there's an out-of-bounds read-access bug. NOTE: the vendor reports that this only occurs when a programmer fails to follow the API specification",
+      "why_excluded": "This is a memory-safety/API-contract issue rather than a non-memory-corruption design flaw. The reported bug is an out-of-bounds read and upstream disputes that it is a library vulnerability at all because the caller failed to pass a NUL-terminated string to a C API that requires one. A Rust-native API should use &str or explicit-length byte slices and therefore should not inherit this exact bug class.",
+      "notes": [
+        "The CVE is marked disputed in all_cves.json.",
+        "Ubuntu notes say the issue was in the fuzzer input and marks the package not affected.",
+        "If the Rust project exposes a C-compatible json_loads-style FFI, NUL-termination validation still needs to happen at the boundary."
+      ]
+    },
+    {
+      "id": "CVE-2024-39349",
+      "summary": "A vulnerability regarding buffer copy without checking size of input ('Classic Buffer Overflow') is found in the libjansson component and it does not affect the upstream library. This allows remote attackers to execute arbitrary code via unspecified vectors. The following models with Synology Camera Firmware versions before 1.0.7-0298 may be affected: BC500 and TC500.",
+      "why_excluded": "NVD explicitly states that this record does not affect upstream Jansson, and it is also a memory-corruption bug outside the requested scope."
+    }
+  ]
+}
