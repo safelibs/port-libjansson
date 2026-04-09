@@ -25,7 +25,7 @@ This phase establishes the first end-to-end compatibility contract for the safe 
   - `JANSSON_IMPLEMENTATION=original|safe`
   - `JANSSON_TEST_MODE=build|runtime|all`
 - The default invocation (`./test-original.sh`) preserves the original runtime baseline: it builds `original/jansson-2.14` into `/usr/local`, exports `LD_LIBRARY_PATH`, and runs the downstream smoke tests against that overlay.
-- Safe runtime mode builds the local `.deb` packages with `safe/scripts/build-deb.sh`, installs them with `dpkg -i`, and then runs the same dependent smoke tests against the actual system-package replacement.
+- Safe runtime/build modes consume the prebuilt local `.deb` packages from `safe/dist/`, install them with `dpkg -i`, and then run the same dependent smoke tests or dependent rebuild harness against the actual system-package replacement.
 - The ulogd JSON-plugin linkage probe no longer hard-codes an architecture path; it resolves the active plugin location from the installed package contents before asserting linkage.
 
 ## Downstream Build Compatibility

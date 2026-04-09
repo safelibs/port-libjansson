@@ -228,15 +228,12 @@ install_mode_packages() {
   MULTIARCH="$(dpkg-architecture -qDEB_HOST_MULTIARCH)"
 }
 
-build_safe_packages() {
-  local safe_debs=()
-
-  note "Building Ubuntu replacement packages from the safe port"
-  mapfile -t safe_debs < <(/work/safe/scripts/build-deb.sh)
-  [ "${#safe_debs[@]}" -eq 2 ] || fail "safe/scripts/build-deb.sh did not emit the expected runtime/dev package paths"
-
-  SAFE_RUNTIME_DEB="${safe_debs[0]}"
-  SAFE_DEV_DEB="${safe_debs[1]}"
+resolve_safe_packages() {
+  note "Resolving prebuilt safe replacement packages"
+  SAFE_RUNTIME_DEB="$(find /work/safe/dist -maxdepth 1 -type f -name 'libjansson4_*.deb' | sort | tail -n 1)"
+  SAFE_DEV_DEB="$(find /work/safe/dist -maxdepth 1 -type f -name 'libjansson-dev_*.deb' | sort | tail -n 1)"
+  [ -n "${SAFE_RUNTIME_DEB}" ] || fail "Missing prebuilt safe runtime package under /work/safe/dist; run safe/scripts/build-deb.sh first"
+  [ -n "${SAFE_DEV_DEB}" ] || fail "Missing prebuilt safe development package under /work/safe/dist; run safe/scripts/build-deb.sh first"
   [ -f "${SAFE_RUNTIME_DEB}" ] || fail "Missing safe runtime package ${SAFE_RUNTIME_DEB}"
   [ -f "${SAFE_DEV_DEB}" ] || fail "Missing safe development package ${SAFE_DEV_DEB}"
 }
@@ -780,7 +777,7 @@ run_runtime_smoke_tests() {
 install_mode_packages
 
 if [ "${JANSSON_IMPLEMENTATION}" = "safe" ]; then
-  build_safe_packages
+  resolve_safe_packages
   install_safe_jansson
 fi
 

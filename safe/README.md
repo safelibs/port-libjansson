@@ -50,6 +50,7 @@ safe/scripts/check-link-compat.sh --installed-root "$install_root"
 Run the downstream-dependent harnesses from the repository root with the parameterized entrypoint:
 
 ```sh
+safe/scripts/build-deb.sh
 ./test-original.sh
 JANSSON_IMPLEMENTATION=safe JANSSON_TEST_MODE=runtime ./test-original.sh
 JANSSON_IMPLEMENTATION=safe JANSSON_TEST_MODE=build ./test-original.sh
@@ -60,7 +61,7 @@ Mode semantics:
 
 - `JANSSON_IMPLEMENTATION=original` keeps the original runtime baseline as the default. Runtime mode builds upstream `original/jansson-2.14` into `/usr/local` and exercises the existing smoke tests against that overlay.
 - In `JANSSON_TEST_MODE=build`, `JANSSON_IMPLEMENTATION=original` uses Ubuntu's archive `libjansson4` and `libjansson-dev` packages as the package-manager compile baseline.
-- `JANSSON_IMPLEMENTATION=safe` builds `safe/dist/libjansson4_*.deb` and `safe/dist/libjansson-dev_*.deb`, installs them with `dpkg -i`, and exercises the same downstream smoke tests as an actual system-package replacement.
+- `JANSSON_IMPLEMENTATION=safe` consumes the prebuilt `safe/dist/libjansson4_*.deb` and `safe/dist/libjansson-dev_*.deb` artifacts, installs them with `dpkg -i`, and exercises the same downstream smoke tests as an actual system-package replacement.
 - `JANSSON_TEST_MODE=build` skips the runtime smoke tests and instead invokes [`safe/scripts/check-dependent-builds.sh`](/home/yans/safelibs/port-libjansson/safe/scripts/check-dependent-builds.sh).
 - `JANSSON_TEST_MODE=runtime` only runs the downstream binary smoke tests.
 - `JANSSON_TEST_MODE=all` runs the package-based dependent rebuild harness first and then the runtime smoke tests.
