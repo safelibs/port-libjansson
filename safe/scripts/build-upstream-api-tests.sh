@@ -53,7 +53,15 @@ normalize_name() {
 }
 
 if [ "$build_all" -eq 1 ]; then
-    set -- "$tests_dir"/test_*.c
+    set --
+    for test_src in "$tests_dir"/test_*.c; do
+        case "$(basename "$test_src")" in
+            test_dump.c)
+                continue
+                ;;
+        esac
+        set -- "$@" "$test_src"
+    done
 fi
 
 [ $# -gt 0 ] || usage

@@ -5,6 +5,7 @@ use crate::raw::alloc::{jsonp_free, jsonp_malloc};
 
 const STRBUFFER_MIN_SIZE: usize = 16;
 const STRBUFFER_FACTOR: usize = 2;
+const STRBUFFER_SIZE_MAX: usize = usize::MAX;
 
 #[repr(C)]
 pub struct RawBuf {
@@ -30,6 +31,11 @@ impl RawBuf {
     #[inline]
     pub fn value(&self) -> *const c_char {
         self.value.cast_const()
+    }
+
+    #[inline]
+    pub fn value_mut(&mut self) -> *mut c_char {
+        self.value
     }
 
     pub unsafe fn init(&mut self) -> i32 {
@@ -70,9 +76,9 @@ impl RawBuf {
 
     pub unsafe fn steal_value(&mut self) -> *mut c_char {
         let result = self.value;
-        self.size = 0;
-        self.length = 0;
         self.value = null_mut();
+        self.length = 0;
+        self.size = 0;
         result
     }
 
@@ -86,15 +92,15 @@ impl RawBuf {
         }
 
         if size >= self.size.saturating_sub(self.length) {
-            let Some(length_plus_size) = self.length.checked_add(size) else {
+            if self.size > STRBUFFER_SIZE_MAX / STRBUFFER_FACTOR
+                || size > STRBUFFER_SIZE_MAX - 1
+                || self.length > STRBUFFER_SIZE_MAX - 1 - size
+            {
                 return -1;
-            };
-            let Some(min_size) = length_plus_size.checked_add(1) else {
-                return -1;
-            };
-            let Some(doubled_size) = self.size.checked_mul(STRBUFFER_FACTOR) else {
-                return -1;
-            };
+            }
+
+            let doubled_size = self.size * STRBUFFER_FACTOR;
+            let min_size = self.length + size + 1;
             let new_size = doubled_size.max(min_size);
             let new_value = unsafe { jsonp_malloc(new_size) }.cast::<c_char>();
             if new_value.is_null() {
