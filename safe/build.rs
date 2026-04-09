@@ -1,6 +1,7 @@
 use std::env;
 use std::fs;
 use std::io;
+use std::process::Command;
 use std::path::{Path, PathBuf};
 
 const ABI_VERSION_NODE: &str = "libjansson.so.4";
@@ -68,17 +69,9 @@ fn main() -> io::Result<()> {
     }
 
     println!("cargo:rustc-env=JANSSON_RUNTIME_VERSION={ABI_RUNTIME_VERSION}");
-
-    cc::Build::new()
-        .include(manifest_dir.join("include"))
-        .files([
-            manifest_dir.join("csrc/pack_unpack_shim.c"),
-            manifest_dir.join("csrc/sprintf_shim.c"),
-        ])
-        .cargo_metadata(false)
-        .flag_if_supported("-Wno-unused-parameter")
-        .warnings(true)
-        .compile("jansson_shims");
+    println!("cargo:rerun-if-env-changed=CC");
+    println!("cargo:rerun-if-env-changed=AR");
+    compile_shims(&manifest_dir, &out_dir)?;
 
     println!("cargo:rustc-link-search=native={}", out_dir.display());
     println!("cargo:rustc-link-lib=static:+whole-archive=jansson_shims");
@@ -111,4 +104,71 @@ fn normalize_newlines(input: &str) -> String {
         normalized.push('\n');
     }
     normalized
+}
+
+fn compile_shims(manifest_dir: &Path, out_dir: &Path) -> io::Result<()> {
+    let cc = env::var("CC").unwrap_or_else(|_| {
+        if Path::new("/usr/bin/cc").exists() {
+            String::from("/usr/bin/cc")
+        } else {
+            String::from("cc")
+        }
+    });
+    let ar = env::var("AR").unwrap_or_else(|_| {
+        if Path::new("/usr/bin/ar").exists() {
+            String::from("/usr/bin/ar")
+        } else {
+            String::from("ar")
+        }
+    });
+    let include_dir = manifest_dir.join("include");
+    let sources = [
+        manifest_dir.join("csrc/pack_unpack_shim.c"),
+        manifest_dir.join("csrc/sprintf_shim.c"),
+    ];
+    let archive_path = out_dir.join("libjansson_shims.a");
+    let mut objects = Vec::with_capacity(sources.len());
+
+    for source in sources {
+        let stem = source
+            .file_stem()
+            .expect("shim source should have a file stem");
+        let object_path = out_dir.join(Path::new(stem)).with_extension("o");
+        let status = Command::new(&cc)
+            .arg("-I")
+            .arg(&include_dir)
+            .arg("-fPIC")
+            .arg("-Wall")
+            .arg("-Wextra")
+            .arg("-Wno-unused-parameter")
+            .arg("-c")
+            .arg(&source)
+            .arg("-o")
+            .arg(&object_path)
+            .status()?;
+
+        if !status.success() {
+            return Err(io::Error::other(format!(
+                "failed to compile {} with {}",
+                source.display(),
+                cc
+            )));
+        }
+
+        objects.push(object_path);
+    }
+
+    let status = Command::new(&ar)
+        .arg("crs")
+        .arg(&archive_path)
+        .args(&objects)
+        .status()?;
+    if !status.success() {
+        return Err(io::Error::other(format!(
+            "failed to archive shim objects with {}",
+            ar
+        )));
+    }
+
+    Ok(())
 }

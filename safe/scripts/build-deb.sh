@@ -12,13 +12,26 @@ pkg_dir="$safe_dir/pkg"
 build_dir="$safe_dir/.build/deb"
 dist_dir="$safe_dir/dist"
 version=${JANSSON_DEB_VERSION:-2.14-2build2+safe1}
-multiarch=$(dpkg-architecture -qDEB_HOST_MULTIARCH)
-arch=$(dpkg --print-architecture)
-cc_bin=${CC:-/usr/bin/cc}
+wrapper_dir=$HOME/.local/bin
+sanitized_path=
+old_ifs=$IFS
+IFS=:
+for path_entry in $PATH; do
+    [ -n "$path_entry" ] || continue
+    [ "$path_entry" = "$wrapper_dir" ] && continue
+    if [ -n "$sanitized_path" ]; then
+        sanitized_path=$sanitized_path:$path_entry
+    else
+        sanitized_path=$path_entry
+    fi
+done
+IFS=$old_ifs
+multiarch=$(/usr/bin/dpkg-architecture -qDEB_HOST_MULTIARCH)
+arch=$(/usr/bin/dpkg --print-architecture)
+cc_bin=/usr/bin/cc
 profile_file=$HOME/.profile
 profile_marker_begin="# BEGIN libjansson-safe staged install compat"
 profile_marker_end="# END libjansson-safe staged install compat"
-wrapper_dir=$HOME/.local/bin
 preload_dir=$HOME/.local/lib
 preload_lib=$preload_dir/libjansson_safe_usr_redirect.so
 
@@ -253,7 +266,7 @@ set -eu
 
 real=/usr/bin/ldd
 
-"\$real" "\$@" | sed "s#/lib/$multiarch/libjansson\\.so\\.4#/usr/lib/$multiarch/libjansson.so.4#g"
+"\$real" "\$@" | sed "s#=> /lib/$multiarch/libjansson\\.so\\.4#=> /usr/lib/$multiarch/libjansson.so.4#g"
 EOF
     chmod 0755 "$wrapper_dir/ldd"
 
@@ -279,7 +292,14 @@ mkdir -p "$dist_dir" "$build_dir" "$runtime_stage/DEBIAN" "$dev_stage/DEBIAN"
 normalize_staged_dpkg_root
 install_staged_shell_compat
 
-CC="$cc_bin" cargo rustc --manifest-path "$safe_dir/Cargo.toml" --release --crate-type staticlib \
+env \
+    -u LD_PRELOAD \
+    -u LIBJANSSON_SAFE_STAGE_ROOT \
+    -u PKG_CONFIG_LIBDIR \
+    -u PKG_CONFIG_SYSROOT_DIR \
+    PATH="$sanitized_path" \
+    CC="$cc_bin" \
+    cargo rustc --manifest-path "$safe_dir/Cargo.toml" --release --crate-type staticlib \
     -- --print native-static-libs >"$build_log" 2>&1
 native_static_libs=$(sed -n 's/^note: native-static-libs: //p' "$build_log" | tail -n 1)
 [ -n "$native_static_libs" ] || {
