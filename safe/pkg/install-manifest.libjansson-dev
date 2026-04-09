@@ -1,0 +1,5 @@
+usr/include/jansson.h
+usr/include/jansson_config.h
+usr/lib/@DEB_HOST_MULTIARCH@/libjansson.a
+usr/lib/@DEB_HOST_MULTIARCH@/libjansson.so -> libjansson.so.4
+usr/lib/@DEB_HOST_MULTIARCH@/pkgconfig/jansson.pc

@@ -2,15 +2,23 @@
 set -eu
 
 usage() {
-    echo "Usage: $0 [--all] [--installed-dev] [--tests-dir DIR] [test_name ...]" >&2
+    echo "Usage: $0 [--all] [--installed-dev --installed-root ROOT] [--tests-dir DIR] [test_name ...]" >&2
     exit 2
 }
 
 root=$(CDPATH= cd -- "$(dirname "$0")/../.." && pwd)
 safe_dir="$root/safe"
 mode="build-tree"
+installed_root=
 tests_dir="$safe_dir/tests/upstream-api"
 build_all=0
+multiarch=$(dpkg-architecture -qDEB_HOST_MULTIARCH)
+runtime_version=$(
+    sed -n 's/^const ABI_RUNTIME_VERSION: &str = "\(.*\)";/\1/p' "$safe_dir/build.rs"
+)
+soname=$(
+    sed -n 's/^const ABI_VERSION_NODE: &str = "\(.*\)";/\1/p' "$safe_dir/build.rs"
+)
 
 while [ $# -gt 0 ]; do
     case "$1" in
@@ -21,6 +29,11 @@ while [ $# -gt 0 ]; do
         --installed-dev)
             mode="installed-dev"
             shift
+            ;;
+        --installed-root)
+            [ $# -ge 2 ] || usage
+            installed_root=$2
+            shift 2
             ;;
         --tests-dir)
             [ $# -ge 2 ] || usage
@@ -43,6 +56,34 @@ while [ $# -gt 0 ]; do
     esac
 done
 
+case "$installed_root" in
+    "")
+        ;;
+    /*)
+        ;;
+    *)
+        installed_root=$root/$installed_root
+        ;;
+esac
+
+if [ -n "$installed_root" ] && [ "$mode" != "installed-dev" ]; then
+    echo "--installed-root requires --installed-dev" >&2
+    exit 2
+fi
+
+if [ "$mode" = "installed-dev" ] && [ -z "$installed_root" ]; then
+    installed_root=/
+fi
+
+[ -n "$runtime_version" ] || {
+    echo "failed to resolve ABI runtime version from safe/build.rs" >&2
+    exit 1
+}
+[ -n "$soname" ] || {
+    echo "failed to resolve SONAME from safe/build.rs" >&2
+    exit 1
+}
+
 normalize_name() {
     name=$1
     name=${name##*/}
@@ -52,32 +93,52 @@ normalize_name() {
     printf '%s\n' "$name"
 }
 
-if [ "$build_all" -eq 1 ]; then
-    set --
-    for test_src in "$tests_dir"/test_*.c; do
-        case "$(basename "$test_src")" in
-            test_dump.c)
-                continue
-                ;;
-        esac
-        set -- "$@" "$test_src"
-    done
-fi
+sanitize_root_tag() {
+    printf '%s' "$1" | sed 's#[^A-Za-z0-9_.-]#_#g'
+}
 
-[ $# -gt 0 ] || usage
+clean_env() {
+    env -u PKG_CONFIG_PATH -u LD_LIBRARY_PATH -u LIBRARY_PATH -u CPATH -u C_INCLUDE_PATH "$@"
+}
 
-build_dir="$safe_dir/.build/api-tests/$mode"
-manifest="$build_dir/manifest.txt"
-mkdir -p "$build_dir"
-: >"$manifest"
+pkg_config_cmd() {
+    pkgconfig_libdir=$installed_root/usr/lib/$multiarch/pkgconfig:$installed_root/usr/lib/pkgconfig:$installed_root/usr/share/pkgconfig
+    env \
+        -u PKG_CONFIG_PATH \
+        -u LD_LIBRARY_PATH \
+        -u LIBRARY_PATH \
+        -u CPATH \
+        -u C_INCLUDE_PATH \
+        PKG_CONFIG_DIR= \
+        PKG_CONFIG_LIBDIR="$pkgconfig_libdir" \
+        PKG_CONFIG_SYSROOT_DIR="$installed_root" \
+        "$@"
+}
 
-cc_bin=${CC:-cc}
-runtime_dir="$build_dir/runtime-lib"
+emit_build_tree_shared() {
+    build_log=$safe_dir/.build/api-tests.native-static-libs.log
 
-verify_safe_linkage() {
+    cargo rustc --manifest-path "$safe_dir/Cargo.toml" --release --crate-type staticlib \
+        -- --print native-static-libs >"$build_log" 2>&1
+    native_static_libs=$(sed -n 's/^note: native-static-libs: //p' "$build_log" | tail -n 1)
+    [ -n "$native_static_libs" ] || {
+        cat "$build_log" >&2
+        echo "failed to resolve native static library flags" >&2
+        exit 1
+    }
+
+    "${CC:-cc}" -shared -o "$safe_dir/target/release/libjansson.so.$runtime_version" \
+        -Wl,-soname,"$soname" \
+        -Wl,--version-script,"$safe_dir/jansson.map" \
+        -Wl,--whole-archive "$safe_dir/target/release/libjansson.a" -Wl,--no-whole-archive \
+        $native_static_libs
+    ln -sfn "libjansson.so.$runtime_version" "$safe_dir/target/release/$soname"
+}
+
+verify_linkage() {
     exe=$1
-    expected=$(readlink -f "$safe_dir/target/release/libjansson.so")
-    actual=$(ldd "$exe" | awk '/libjansson\.so\.4/ { print $3; exit }')
+    expected_root=$2
+    actual=$(clean_env ldd "$exe" | awk '/libjansson\.so\.4/ { print $3; exit }')
 
     [ -n "$actual" ] || {
         echo "failed to resolve libjansson.so.4 for $exe" >&2
@@ -85,23 +146,68 @@ verify_safe_linkage() {
     }
 
     actual=$(readlink -f "$actual")
-    [ "$actual" = "$expected" ] || {
-        echo "expected $exe to use $expected but it resolved to $actual" >&2
-        exit 1
-    }
+    expected_root=$(readlink -f "$expected_root")
+
+    case "$actual" in
+        "$expected_root")
+            ;;
+        "$expected_root"/*)
+            ;;
+        *)
+            echo "expected $exe to use $expected_root but it resolved to $actual" >&2
+            exit 1
+            ;;
+    esac
 }
+
+if [ "$build_all" -eq 1 ]; then
+    set --
+    for test_src in "$tests_dir"/test_*.c; do
+        [ -f "$test_src" ] || continue
+        set -- "$@" "$test_src"
+    done
+fi
+
+[ $# -gt 0 ] || usage
+
+build_tag=$mode
+if [ "$mode" = "installed-dev" ]; then
+    build_tag=$mode-$(sanitize_root_tag "$installed_root")
+fi
+
+build_dir="$safe_dir/.build/api-tests/$build_tag"
+manifest="$build_dir/manifest.txt"
+runtime_dir="$build_dir/runtime-lib"
+mkdir -p "$build_dir"
+: >"$manifest"
+
+cc_bin=${CC:-cc}
 
 case "$mode" in
     build-tree)
-        cargo build --release --manifest-path "$safe_dir/Cargo.toml"
+        emit_build_tree_shared
         mkdir -p "$runtime_dir"
-        ln -sfn "$safe_dir/target/release/libjansson.so" "$runtime_dir/libjansson.so.4"
+        ln -sfn "$safe_dir/target/release/libjansson.so.$runtime_version" "$runtime_dir/$soname"
         include_flags="-I$safe_dir/include"
         link_flags="-L$safe_dir/target/release -Wl,-rpath,$runtime_dir -ljansson"
+        expected_link="$safe_dir/target/release/libjansson.so.$runtime_version"
         ;;
     installed-dev)
-        include_flags=$(pkg-config --cflags jansson)
-        link_flags=$(pkg-config --libs jansson)
+        installed_include=$installed_root/usr/include/jansson.h
+        installed_libdir=$installed_root/usr/lib/$multiarch
+
+        [ -f "$installed_include" ] || {
+            echo "missing installed header: $installed_include" >&2
+            exit 1
+        }
+        [ -f "$installed_libdir/libjansson.so" ] || {
+            echo "missing installed development symlink: $installed_libdir/libjansson.so" >&2
+            exit 1
+        }
+
+        include_flags=$(pkg_config_cmd pkg-config --cflags jansson)
+        link_flags="$(pkg_config_cmd pkg-config --libs jansson) -Wl,-rpath,$installed_libdir"
+        expected_link=$installed_libdir
         ;;
     *)
         usage
@@ -118,12 +224,8 @@ for test_name in "$@"; do
         exit 1
     }
 
-    "$cc_bin" -std=c99 -Wall -Wextra -Werror $include_flags "$src" -o "$exe" $link_flags
-
-    if [ "$mode" = "build-tree" ]; then
-        verify_safe_linkage "$exe"
-    fi
-
+    clean_env "$cc_bin" -std=c99 -Wall -Wextra -Werror $include_flags "$src" -o "$exe" $link_flags
+    verify_linkage "$exe" "$expected_link"
     printf '%s\n' "$base" >>"$manifest"
 done
 

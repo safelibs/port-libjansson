@@ -9,6 +9,16 @@ usage() {
 root=$(CDPATH= cd -- "$(dirname "$0")/../.." && pwd)
 upstream_root="$root/original/jansson-2.14/test"
 mirror_root="$root/safe/tests"
+mirror_entries='
+dir:suites/api:upstream-api
+dir:bin:upstream-bin
+dir:scripts:upstream-scripts
+dir:suites/valid:upstream-suites/valid
+dir:suites/invalid:upstream-suites/invalid
+dir:suites/invalid-unicode:upstream-suites/invalid-unicode
+dir:suites/encoding-flags:upstream-suites/encoding-flags
+file:run-suites:run-suites
+'
 
 sync_dir() {
     src=$1
@@ -53,25 +63,39 @@ check_file() {
 }
 
 run_sync() {
-    sync_dir "$upstream_root/suites/api" "$mirror_root/upstream-api"
-    sync_dir "$upstream_root/bin" "$mirror_root/upstream-bin"
-    sync_dir "$upstream_root/scripts" "$mirror_root/upstream-scripts"
-    sync_dir "$upstream_root/suites/valid" "$mirror_root/upstream-suites/valid"
-    sync_dir "$upstream_root/suites/invalid" "$mirror_root/upstream-suites/invalid"
-    sync_dir "$upstream_root/suites/invalid-unicode" "$mirror_root/upstream-suites/invalid-unicode"
-    sync_dir "$upstream_root/suites/encoding-flags" "$mirror_root/upstream-suites/encoding-flags"
-    sync_file "$upstream_root/run-suites" "$mirror_root/run-suites"
+    printf '%s\n' "$mirror_entries" | while IFS=: read -r kind src dst; do
+        [ -n "$kind" ] || continue
+        case "$kind" in
+            dir)
+                sync_dir "$upstream_root/$src" "$mirror_root/$dst"
+                ;;
+            file)
+                sync_file "$upstream_root/$src" "$mirror_root/$dst"
+                ;;
+            *)
+                echo "unknown mirror entry kind: $kind" >&2
+                exit 1
+                ;;
+        esac
+    done
 }
 
 run_check() {
-    check_dir "$upstream_root/suites/api" "$mirror_root/upstream-api"
-    check_dir "$upstream_root/bin" "$mirror_root/upstream-bin"
-    check_dir "$upstream_root/scripts" "$mirror_root/upstream-scripts"
-    check_dir "$upstream_root/suites/valid" "$mirror_root/upstream-suites/valid"
-    check_dir "$upstream_root/suites/invalid" "$mirror_root/upstream-suites/invalid"
-    check_dir "$upstream_root/suites/invalid-unicode" "$mirror_root/upstream-suites/invalid-unicode"
-    check_dir "$upstream_root/suites/encoding-flags" "$mirror_root/upstream-suites/encoding-flags"
-    check_file "$upstream_root/run-suites" "$mirror_root/run-suites"
+    printf '%s\n' "$mirror_entries" | while IFS=: read -r kind src dst; do
+        [ -n "$kind" ] || continue
+        case "$kind" in
+            dir)
+                check_dir "$upstream_root/$src" "$mirror_root/$dst"
+                ;;
+            file)
+                check_file "$upstream_root/$src" "$mirror_root/$dst"
+                ;;
+            *)
+                echo "unknown mirror entry kind: $kind" >&2
+                exit 1
+                ;;
+        esac
+    done
 }
 
 [ $# -eq 1 ] || usage
