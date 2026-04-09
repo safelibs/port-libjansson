@@ -6,6 +6,6 @@ includedir=@includedir@
 Name: Jansson
 Description: Library for encoding, decoding and manipulating JSON data
 Version: @VERSION@
-Libs: -L${libdir} -ljansson
+Libs: -L${libdir} -Wl,-rpath,${libdir} -ljansson
 Libs.private: @LIBS_PRIVATE@
 Cflags: -I${includedir}
