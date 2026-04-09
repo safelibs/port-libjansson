@@ -4,9 +4,7 @@ use std::slice;
 
 use libc::FILE;
 
-use crate::abi::{
-    json_error_code, json_error_t, json_int_t, json_load_callback_t, json_t,
-};
+use crate::abi::{json_error_code, json_error_t, json_int_t, json_load_callback_t, json_t};
 use crate::error::{jsonp_error_init, jsonp_error_vformat};
 use crate::raw::alloc::jsonp_free;
 use crate::raw::buf::RawBuf;
@@ -182,7 +180,9 @@ impl Lexer {
         if self.saved_text.len() == 0 {
             &[]
         } else {
-            unsafe { slice::from_raw_parts(self.saved_text.value().cast::<u8>(), self.saved_text.len()) }
+            unsafe {
+                slice::from_raw_parts(self.saved_text.value().cast::<u8>(), self.saved_text.len())
+            }
         }
     }
 
@@ -233,11 +233,7 @@ impl Lexer {
         }
     }
 
-    unsafe fn plain_error_set(
-        error: *mut json_error_t,
-        code: json_error_code,
-        message: String,
-    ) {
+    unsafe fn plain_error_set(error: *mut json_error_t, code: json_error_code, message: String) {
         if error.is_null() {
             return;
         }
@@ -251,7 +247,11 @@ impl Lexer {
 
     unsafe fn oom(&self, error: *mut json_error_t) {
         unsafe {
-            self.error_set(error, json_error_code::json_error_out_of_memory, "out of memory".into());
+            self.error_set(
+                error,
+                json_error_code::json_error_out_of_memory,
+                "out of memory".into(),
+            );
         }
     }
 
@@ -483,7 +483,8 @@ impl Lexer {
             }
         }
 
-        let out = unsafe { crate::raw::alloc::jsonp_malloc(self.saved_text.len() + 1) }.cast::<c_char>();
+        let out =
+            unsafe { crate::raw::alloc::jsonp_malloc(self.saved_text.len() + 1) }.cast::<c_char>();
         if out.is_null() {
             unsafe {
                 self.oom(error);
@@ -539,7 +540,8 @@ impl Lexer {
                                                 format!(
                                                     "invalid Unicode escape '{}'",
                                                     String::from_utf8_lossy(
-                                                        &saved[source..(source + 6).min(saved.len())]
+                                                        &saved
+                                                            [source..(source + 6).min(saved.len())]
                                                     )
                                                 ),
                                             );
@@ -805,7 +807,8 @@ impl Lexer {
         let mut c;
         loop {
             c = unsafe { self.get_char(error) };
-            if !matches!(c, x if x == b' ' as c_int || x == b'\t' as c_int || x == b'\n' as c_int || x == b'\r' as c_int) {
+            if !matches!(c, x if x == b' ' as c_int || x == b'\t' as c_int || x == b'\n' as c_int || x == b'\r' as c_int)
+            {
                 break;
             }
         }
@@ -832,7 +835,10 @@ impl Lexer {
                     || y == b']' as c_int
                     || y == b':' as c_int
                     || y == b',' as c_int
-            ) => x,
+            ) =>
+            {
+                x
+            }
             x if x == b'"' as c_int => {
                 unsafe {
                     self.scan_string(error);
@@ -1038,17 +1044,6 @@ unsafe fn push_value_frame(
     flags: usize,
     error: *mut json_error_t,
 ) -> Result<Option<*mut json_t>, ()> {
-    if frames.len() + 1 > JSON_PARSER_MAX_DEPTH {
-        unsafe {
-            lex.error_set(
-                error,
-                json_error_code::json_error_stack_overflow,
-                "maximum parsing depth reached".into(),
-            );
-        }
-        return Err(());
-    }
-
     match lex.token {
         TOKEN_STRING => {
             let Some((value, len)) = (unsafe { lex.steal_string() }) else {
@@ -1104,6 +1099,17 @@ unsafe fn push_value_frame(
         TOKEN_FALSE => Ok(Some(crate::scalar::json_false())),
         TOKEN_NULL => Ok(Some(crate::scalar::json_null())),
         x if x == b'{' as c_int => {
+            if frames.len() >= JSON_PARSER_MAX_DEPTH {
+                unsafe {
+                    lex.error_set(
+                        error,
+                        json_error_code::json_error_stack_overflow,
+                        "maximum parsing depth reached".into(),
+                    );
+                }
+                return Err(());
+            }
+
             let object = crate::object::json_object();
             if object.is_null() {
                 unsafe {
@@ -1123,6 +1129,17 @@ unsafe fn push_value_frame(
             Ok(None)
         }
         x if x == b'[' as c_int => {
+            if frames.len() >= JSON_PARSER_MAX_DEPTH {
+                unsafe {
+                    lex.error_set(
+                        error,
+                        json_error_code::json_error_stack_overflow,
+                        "maximum parsing depth reached".into(),
+                    );
+                }
+                return Err(());
+            }
+
             let array = crate::array::json_array();
             if array.is_null() {
                 unsafe {
@@ -1345,7 +1362,8 @@ unsafe fn parse_json(lex: &mut Lexer, flags: usize, error: *mut json_error_t) ->
                                 return null_mut();
                             };
 
-                            if unsafe { slice::from_raw_parts(name.cast::<u8>(), len) }.contains(&0) {
+                            if unsafe { slice::from_raw_parts(name.cast::<u8>(), len) }.contains(&0)
+                            {
                                 unsafe {
                                     jsonp_free(name.cast());
                                     lex.error_set(
@@ -1359,7 +1377,9 @@ unsafe fn parse_json(lex: &mut Lexer, flags: usize, error: *mut json_error_t) ->
                             }
 
                             if flags & JSON_REJECT_DUPLICATES != 0
-                                && unsafe { crate::object::json_object_getn(*value, name, len) }.is_null() == false
+                                && unsafe { crate::object::json_object_getn(*value, name, len) }
+                                    .is_null()
+                                    == false
                             {
                                 unsafe {
                                     jsonp_free(name.cast());
@@ -1417,7 +1437,9 @@ unsafe fn parse_json(lex: &mut Lexer, flags: usize, error: *mut json_error_t) ->
                         }
 
                         if flags & JSON_REJECT_DUPLICATES != 0
-                            && unsafe { crate::object::json_object_getn(*value, name, len) }.is_null() == false
+                            && unsafe { crate::object::json_object_getn(*value, name, len) }
+                                .is_null()
+                                == false
                         {
                             unsafe {
                                 jsonp_free(name.cast());
@@ -1458,15 +1480,17 @@ unsafe fn parse_json(lex: &mut Lexer, flags: usize, error: *mut json_error_t) ->
                         }
                         None
                     }
-                    ObjectState::ExpectValue => match unsafe { push_value_frame(lex, &mut frames, flags, error) } {
-                        Ok(result) => result,
-                        Err(()) => {
-                            unsafe {
-                                cleanup_frames(&mut frames, null_mut());
+                    ObjectState::ExpectValue => {
+                        match unsafe { push_value_frame(lex, &mut frames, flags, error) } {
+                            Ok(result) => result,
+                            Err(()) => {
+                                unsafe {
+                                    cleanup_frames(&mut frames, null_mut());
+                                }
+                                return null_mut();
                             }
-                            return null_mut();
                         }
-                    },
+                    }
                     ObjectState::ExpectCommaOrEnd => {
                         if lex.token == b',' as c_int {
                             *state = ObjectState::ExpectKey;
@@ -1578,7 +1602,10 @@ pub unsafe extern "C" fn json_loads(
         return null_mut();
     }
 
-    let mut state = StringData { data: input, pos: 0 };
+    let mut state = StringData {
+        data: input,
+        pos: 0,
+    };
     unsafe {
         parse_with_source(
             string_get,
@@ -1775,5 +1802,61 @@ pub unsafe extern "C" fn json_load_callback(
             error,
             SOURCE_CALLBACK.as_ptr().cast::<c_char>(),
         )
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::ffi::{CStr, CString};
+
+    use crate::abi::{
+        json_error_code, json_error_t, JSON_ERROR_SOURCE_LENGTH, JSON_ERROR_TEXT_LENGTH,
+    };
+    use crate::array::json_array_size;
+
+    use super::*;
+
+    fn nested_arrays(depth: usize) -> CString {
+        CString::new(format!("{}0{}", "[".repeat(depth), "]".repeat(depth))).unwrap()
+    }
+
+    fn empty_error() -> json_error_t {
+        json_error_t {
+            line: 0,
+            column: 0,
+            position: 0,
+            source: [0; JSON_ERROR_SOURCE_LENGTH],
+            text: [0; JSON_ERROR_TEXT_LENGTH],
+        }
+    }
+
+    #[test]
+    fn parser_depth_limit_allows_2048_containers() {
+        let input = nested_arrays(JSON_PARSER_MAX_DEPTH);
+        let mut error = empty_error();
+
+        let json = unsafe { json_loads(input.as_ptr(), 0, &mut error) };
+        assert!(!json.is_null());
+        assert_eq!(json_array_size(json), 1);
+
+        unsafe {
+            crate::abi::decref(json);
+        }
+    }
+
+    #[test]
+    fn parser_depth_limit_rejects_2049_containers() {
+        let input = nested_arrays(JSON_PARSER_MAX_DEPTH + 1);
+        let mut error = empty_error();
+
+        let json = unsafe { json_loads(input.as_ptr(), 0, &mut error) };
+        assert!(json.is_null());
+        assert_eq!(
+            error.text[JSON_ERROR_TEXT_LENGTH - 1] as i32,
+            json_error_code::json_error_stack_overflow as i32
+        );
+
+        let message = unsafe { CStr::from_ptr(error.text.as_ptr()) }.to_string_lossy();
+        assert!(message.contains("maximum parsing depth reached"));
     }
 }
