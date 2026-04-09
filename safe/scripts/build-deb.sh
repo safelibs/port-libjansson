@@ -9,7 +9,7 @@ usage() {
 root=$(CDPATH= cd -- "$(dirname "$0")/../.." && pwd)
 safe_dir="$root/safe"
 pkg_dir="$safe_dir/pkg"
-build_dir="$safe_dir/.build/deb"
+build_dir=
 dist_dir="$safe_dir/dist"
 version=${JANSSON_DEB_VERSION:-2.14-2build2+safe1}
 wrapper_dir=$HOME/.local/bin
@@ -48,6 +48,8 @@ while [ $# -gt 0 ]; do
             ;;
     esac
 done
+
+build_dir=$(mktemp -d "${TMPDIR:-/tmp}/libjansson-build-deb.XXXXXX")
 
 api_version=$(
     awk '/^#define JANSSON_VERSION / { gsub(/"/, "", $3); print $3; exit }' \
@@ -181,7 +183,13 @@ EOF
     chmod 0755 "$wrapper_dir/ldconfig"
 }
 
-rm -rf "$dist_dir" "$build_dir"
+cleanup() {
+    rm -rf "$build_dir"
+}
+
+trap cleanup EXIT HUP INT TERM
+
+rm -rf "$dist_dir"
 mkdir -p "$dist_dir" "$build_dir" "$runtime_stage/DEBIAN" "$dev_stage/DEBIAN"
 normalize_staged_dpkg_root
 remove_staged_shell_compat
