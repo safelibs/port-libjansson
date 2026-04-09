@@ -58,7 +58,8 @@ pub unsafe extern "C" fn json_get_alloc_funcs(
     }
 }
 
-pub unsafe fn jsonp_malloc(size: usize) -> *mut c_void {
+#[no_mangle]
+pub unsafe extern "C" fn jsonp_malloc(size: usize) -> *mut c_void {
     if size == 0 {
         return null_mut();
     }
@@ -69,7 +70,8 @@ pub unsafe fn jsonp_malloc(size: usize) -> *mut c_void {
     }
 }
 
-pub unsafe fn jsonp_free(ptr: *mut c_void) {
+#[no_mangle]
+pub unsafe extern "C" fn jsonp_free(ptr: *mut c_void) {
     if ptr.is_null() {
         return;
     }
@@ -81,11 +83,13 @@ pub unsafe fn jsonp_free(ptr: *mut c_void) {
     }
 }
 
-pub unsafe fn jsonp_strdup(value: *const c_char) -> *mut c_char {
+#[no_mangle]
+pub unsafe extern "C" fn jsonp_strdup(value: *const c_char) -> *mut c_char {
     unsafe { jsonp_strndup(value, libc::strlen(value)) }
 }
 
-pub unsafe fn jsonp_strndup(value: *const c_char, len: usize) -> *mut c_char {
+#[no_mangle]
+pub unsafe extern "C" fn jsonp_strndup(value: *const c_char, len: usize) -> *mut c_char {
     let alloc_len = match len.checked_add(1) {
         Some(alloc_len) => alloc_len,
         None => return null_mut(),
