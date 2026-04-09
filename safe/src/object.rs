@@ -602,7 +602,7 @@ unsafe fn update_recursive_inner(
     let mut result = 0;
     while !iter.is_null() {
         let entry = unsafe { entry_from_order_link(iter) };
-        let current = unsafe { getn_inner(object, entry_key_ptr(entry), (*entry).key_len) };
+        let current = unsafe { json_object_get(object.cast_const(), entry_key_ptr(entry)) };
         if unsafe { is_object(current) } && unsafe { is_object((*entry).value) } {
             if unsafe { update_recursive_inner(current, (*entry).value, parents) } != 0 {
                 result = -1;

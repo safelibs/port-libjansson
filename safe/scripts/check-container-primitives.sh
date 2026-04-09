@@ -265,11 +265,42 @@ static void test_binary_key_foreach_compat(void) {
     json_decref(binary_only_a);
 }
 
+static void test_binary_key_recursive_update_compat(void) {
+    const char binary_key[] = {'x', '\0', 'y'};
+    json_t *dst = json_object();
+    json_t *dst_child = json_object();
+    json_t *src = json_object();
+    json_t *src_child = json_object();
+
+    check(dst && dst_child && src && src_child, "failed to allocate recursive binary-key objects");
+    check(json_object_set_new(dst_child, "left", json_integer(1)) == 0, "dst_child init failed");
+    check(json_object_set_new(dst, "x", dst_child) == 0, "dst init failed");
+    check(json_object_set_new(src_child, "right", json_integer(2)) == 0, "src_child init failed");
+    check(json_object_setn_new_nocheck(src, binary_key, sizeof(binary_key), src_child) == 0,
+          "src binary key init failed");
+
+    check(json_object_update_recursive(dst, src) == 0, "json_object_update_recursive failed");
+    check(json_object_size(dst) == 1,
+          "json_object_update_recursive created an unexpected second key");
+    check(json_object_get(dst, "x") == dst_child,
+          "json_object_update_recursive did not merge into the cstring-matched object");
+    check(json_integer_value(json_object_get(dst_child, "left")) == 1,
+          "json_object_update_recursive lost the original nested value");
+    check(json_integer_value(json_object_get(dst_child, "right")) == 2,
+          "json_object_update_recursive failed to merge the nested binary-key value");
+    check(json_object_getn(dst, binary_key, sizeof(binary_key)) == NULL,
+          "json_object_update_recursive preserved the full binary key unexpectedly");
+
+    json_decref(src);
+    json_decref(dst);
+}
+
 int main(void) {
     test_iteration_and_roundtrip();
     test_fixed_keys();
     test_copy_equal_and_updates();
     test_binary_key_foreach_compat();
+    test_binary_key_recursive_update_compat();
     return 0;
 }
 EOF
