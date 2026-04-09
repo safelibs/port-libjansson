@@ -303,9 +303,41 @@ test_janus() (
 
   local pid=""
   local log="/tmp/janus.log"
-  trap 'kill "${pid}" 2>/dev/null || true; wait "${pid}" 2>/dev/null || true' EXIT
+  local janus_cfg_dir=""
+  trap 'kill "${pid}" 2>/dev/null || true; wait "${pid}" 2>/dev/null || true; [ -n "${janus_cfg_dir}" ] && rm -rf "${janus_cfg_dir}"' EXIT
 
-  janus -F /etc/janus >"${log}" 2>&1 &
+  janus_cfg_dir="$(mktemp -d)"
+  cp -a /etc/janus/. "${janus_cfg_dir}/"
+  python3 - "${janus_cfg_dir}/janus.transport.http.jcfg" <<'PY'
+from pathlib import Path
+import sys
+
+path = Path(sys.argv[1])
+lines = path.read_text(encoding="utf-8").splitlines()
+result = []
+in_general = False
+inserted = False
+
+for line in lines:
+    stripped = line.strip()
+    if stripped.startswith("general:"):
+        in_general = True
+    if in_general and (stripped.startswith("#ip =") or stripped.startswith("ip =")):
+        if not inserted:
+            result.append('\tip = "127.0.0.1"\t\t\t\t# Force IPv4 for containerized smoke tests')
+            inserted = True
+        continue
+    if in_general and stripped == "}":
+        if not inserted:
+            result.append('\tip = "127.0.0.1"\t\t\t\t# Force IPv4 for containerized smoke tests')
+            inserted = True
+        in_general = False
+    result.append(line)
+
+path.write_text("\n".join(result) + "\n", encoding="utf-8")
+PY
+
+  janus -F "${janus_cfg_dir}" >"${log}" 2>&1 &
   pid="$!"
 
   wait_for_url "http://127.0.0.1:8088/janus/info"
