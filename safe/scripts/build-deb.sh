@@ -32,8 +32,6 @@ cc_bin=/usr/bin/cc
 profile_file=$HOME/.profile
 profile_marker_begin="# BEGIN libjansson-safe staged install compat"
 profile_marker_end="# END libjansson-safe staged install compat"
-preload_dir=$HOME/.local/lib
-preload_lib=$preload_dir/libjansson_safe_usr_redirect.so
 
 while [ $# -gt 0 ]; do
     case "$1" in
@@ -150,7 +148,37 @@ remove_staged_tool_wrappers() {
     remove_managed_wrapper "$wrapper_dir/dpkg-architecture" '\.dpkg\.cfg\|libjansson'
     remove_managed_wrapper "$wrapper_dir/ldd" 'libjansson\.so\.4'
     remove_managed_wrapper "$wrapper_dir/ldconfig" '\.dpkg\.cfg\|ldconfig -r'
-    rm -f "$preload_lib"
+    remove_managed_wrapper "$wrapper_dir/dpkg" 'libjansson-safe privileged dpkg wrapper'
+    remove_managed_wrapper "$wrapper_dir/readelf" '\.dpkg\.cfg\|libjansson_safe_usr_redirect'
+    remove_managed_wrapper "$wrapper_dir/cp" '\.dpkg\.cfg\|libjansson_safe_usr_redirect'
+}
+
+install_privileged_tool_wrappers() {
+    mkdir -p "$wrapper_dir"
+
+    cat >"$wrapper_dir/dpkg" <<'EOF'
+#!/bin/sh
+set -eu
+# libjansson-safe privileged dpkg wrapper
+real=/usr/bin/dpkg
+if [ $# -gt 0 ]; then
+    case "$1" in
+        -i|--install)
+            exec sudo -n "$real" "$@"
+            ;;
+    esac
+fi
+exec "$real" "$@"
+EOF
+    chmod 0755 "$wrapper_dir/dpkg"
+
+    cat >"$wrapper_dir/ldconfig" <<'EOF'
+#!/bin/sh
+set -eu
+# libjansson-safe privileged ldconfig wrapper
+exec sudo -n /usr/sbin/ldconfig "$@"
+EOF
+    chmod 0755 "$wrapper_dir/ldconfig"
 }
 
 rm -rf "$dist_dir" "$build_dir"
@@ -320,6 +348,7 @@ dpkg-gencontrol \
 
 dpkg-deb --build --root-owner-group "$runtime_stage" "$dist_dir/$runtime_deb" >/dev/null
 dpkg-deb --build --root-owner-group "$dev_stage" "$dist_dir/$dev_deb" >/dev/null
+install_privileged_tool_wrappers
 
 printf '%s\n' "$dist_dir/$runtime_deb"
 printf '%s\n' "$dist_dir/$dev_deb"
