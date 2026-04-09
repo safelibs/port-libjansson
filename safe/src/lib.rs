@@ -7,6 +7,7 @@ pub mod dump;
 pub mod error;
 pub mod load;
 pub mod object;
+mod pack;
 pub mod raw {
     pub mod alloc;
     pub mod buf;
@@ -15,6 +16,7 @@ pub mod raw {
 }
 pub mod scalar;
 pub mod strconv;
+mod unpack;
 pub mod utf;
 pub mod version;
 

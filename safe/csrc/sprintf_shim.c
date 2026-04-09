@@ -30,6 +30,8 @@ void jsonp_error_set(json_error_t *error, int line, int column, size_t position,
     va_end(ap);
 }
 
+/* Keep the C surface to variadic ingress only and route all allocation
+ * through Jansson's configured hooks. */
 json_t *json_vsprintf(const char *fmt, va_list ap) {
     json_t *json = NULL;
     int length;

@@ -38,6 +38,14 @@ fn main() -> io::Result<()> {
         "cargo:rerun-if-changed={}",
         manifest_dir.join("include/jansson_config.h").display()
     );
+    println!(
+        "cargo:rerun-if-changed={}",
+        manifest_dir.join("src/pack.rs").display()
+    );
+    println!(
+        "cargo:rerun-if-changed={}",
+        manifest_dir.join("src/unpack.rs").display()
+    );
 
     let generated_map = generate_version_script(&def_path)?;
     fs::write(&generated_map_path, &generated_map)?;
