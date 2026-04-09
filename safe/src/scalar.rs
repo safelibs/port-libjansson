@@ -3,11 +3,15 @@ use std::ffi::{c_char, c_double, c_int};
 use std::ptr::{self, null, null_mut};
 use std::slice;
 
+use crate::array;
 use crate::abi::{
     bool_to_c_int, json_int_t, json_t, type_of, IMMORTAL_REFCOUNT, JSON_FALSE, JSON_INTEGER,
-    JSON_NULL, JSON_REAL, JSON_STRING, JSON_TRUE,
+    JSON_NULL, JSON_OBJECT, JSON_REAL, JSON_STRING, JSON_TRUE, JSON_ARRAY,
 };
-use crate::raw::alloc::{alloc, free, jsonp_free, jsonp_strndup};
+use crate::object;
+use crate::raw::alloc::{alloc, free, jsonp_free};
+use crate::raw::buf;
+use crate::raw::table::PointerSet;
 use crate::utf;
 
 #[repr(C)]
@@ -53,7 +57,7 @@ fn singleton_ptr(singleton: &'static JsonSingleton) -> *mut json_t {
 }
 
 #[inline]
-unsafe fn init_json(json: *mut json_t, kind: c_int) {
+pub(crate) unsafe fn init_json(json: *mut json_t, kind: c_int) {
     unsafe {
         (*json).type_ = kind;
         (*json).refcount = 1;
@@ -98,7 +102,7 @@ unsafe fn string_create(value: *const c_char, len: usize, own: bool) -> *mut jso
     let dup = if own {
         value.cast_mut()
     } else {
-        unsafe { jsonp_strndup(value, len) }
+        unsafe { buf::dup_cstr(value, len) }
     };
 
     if dup.is_null() {
@@ -161,6 +165,8 @@ pub extern "C" fn json_delete(json: *mut json_t) {
     }
 
     match unsafe { (*json).type_ } {
+        JSON_OBJECT => unsafe { object::delete_object(json) },
+        JSON_ARRAY => unsafe { array::delete_array(json) },
         JSON_STRING => unsafe { delete_string(json) },
         JSON_INTEGER => unsafe { delete_integer(json) },
         JSON_REAL => unsafe { delete_real(json) },
@@ -306,7 +312,7 @@ pub unsafe extern "C" fn json_string_setn_nocheck(
         return -1;
     }
 
-    let dup = unsafe { jsonp_strndup(value, len) };
+    let dup = unsafe { buf::dup_cstr(value, len) };
     if dup.is_null() {
         return -1;
     }
@@ -430,6 +436,8 @@ pub extern "C" fn json_equal(value1: *const json_t, value2: *const json_t) -> c_
     }
 
     let equal = match type1 {
+        JSON_OBJECT => unsafe { object::equal_object(value1, value2) },
+        JSON_ARRAY => unsafe { array::equal_array(value1, value2) },
         JSON_STRING => {
             let string1 = unsafe { &*as_string_ptr(value1) };
             let string2 = unsafe { &*as_string_ptr(value2) };
@@ -458,6 +466,8 @@ pub extern "C" fn json_copy(value: *mut json_t) -> *mut json_t {
     }
 
     match unsafe { (*value).type_ } {
+        JSON_OBJECT => unsafe { object::copy_object(value) },
+        JSON_ARRAY => unsafe { array::copy_array(value) },
         JSON_STRING => unsafe { string_clone(value.cast_const()) },
         JSON_INTEGER => unsafe { integer_clone(value.cast_const()) },
         JSON_REAL => unsafe { real_clone(value.cast_const()) },
@@ -472,7 +482,22 @@ pub extern "C" fn json_deep_copy(value: *const json_t) -> *mut json_t {
         return null_mut();
     }
 
+    let mut parents = PointerSet::new();
+    if unsafe { parents.init() } != 0 {
+        return null_mut();
+    }
+
+    let copied = unsafe { do_deep_copy(value, &mut parents) };
+    unsafe {
+        parents.close();
+    }
+    copied
+}
+
+pub(crate) unsafe fn do_deep_copy(value: *const json_t, parents: &mut PointerSet) -> *mut json_t {
     match unsafe { (*value).type_ } {
+        JSON_OBJECT => unsafe { object::deep_copy_object(value, parents) },
+        JSON_ARRAY => unsafe { array::deep_copy_array(value, parents) },
         JSON_STRING => unsafe { string_clone(value) },
         JSON_INTEGER => unsafe { integer_clone(value) },
         JSON_REAL => unsafe { real_clone(value) },
