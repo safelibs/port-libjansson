@@ -2,11 +2,12 @@
 set -eu
 
 usage() {
-    echo "Usage: $0 [--names-only] [--lib PATH] [--installed-root ROOT]" >&2
+    echo "Usage: $0 [--names-only|--check-versions] [--lib PATH] [--installed-root ROOT]" >&2
     exit 2
 }
 
 root=$(CDPATH= cd -- "$(dirname "$0")/../.." && pwd)
+. "$root/safe/scripts/installed-root-common.sh"
 safe_dir="$root/safe"
 def_file="$root/original/jansson-2.14/src/jansson.def"
 symbols_file="$root/original/jansson-2.14/debian/libjansson4.symbols"
@@ -25,6 +26,10 @@ while [ $# -gt 0 ]; do
     case "$1" in
         --names-only)
             check_versions=0
+            shift
+            ;;
+        --check-versions)
+            check_versions=1
             shift
             ;;
         --lib)
@@ -55,15 +60,9 @@ done
     exit 1
 }
 
-case "$installed_root" in
-    "")
-        ;;
-    /*)
-        ;;
-    *)
-        installed_root=$root/$installed_root
-        ;;
-esac
+if [ -n "$installed_root" ]; then
+    installed_root=$(resolve_installed_root "$root" "$installed_root")
+fi
 
 build_log="$safe_dir/.build/check-exports.native-static-libs.log"
 

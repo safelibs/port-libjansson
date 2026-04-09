@@ -7,6 +7,7 @@ usage() {
 }
 
 root=$(CDPATH= cd -- "$(dirname "$0")/../.." && pwd)
+. "$root/safe/scripts/installed-root-common.sh"
 safe_dir="$root/safe"
 mode="build-tree"
 installed_root=
@@ -45,16 +46,6 @@ while [ $# -gt 0 ]; do
     esac
 done
 
-case "$installed_root" in
-    "")
-        ;;
-    /*)
-        ;;
-    *)
-        installed_root=$root/$installed_root
-        ;;
-esac
-
 if [ -n "$installed_root" ] && [ "$mode" != "installed-dev" ]; then
     echo "--installed-root requires --installed-dev" >&2
     exit 2
@@ -62,6 +53,10 @@ fi
 
 if [ "$mode" = "installed-dev" ] && [ -z "$installed_root" ]; then
     installed_root=/
+fi
+
+if [ -n "$installed_root" ]; then
+    installed_root=$(resolve_installed_root "$root" "$installed_root")
 fi
 
 [ -n "$runtime_version" ] || {

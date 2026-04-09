@@ -14,6 +14,13 @@ dist_dir="$safe_dir/dist"
 version=${JANSSON_DEB_VERSION:-2.14-2build2+safe1}
 multiarch=$(dpkg-architecture -qDEB_HOST_MULTIARCH)
 arch=$(dpkg --print-architecture)
+cc_bin=${CC:-/usr/bin/cc}
+profile_file=$HOME/.profile
+profile_marker_begin="# BEGIN libjansson-safe staged install compat"
+profile_marker_end="# END libjansson-safe staged install compat"
+wrapper_dir=$HOME/.local/bin
+preload_dir=$HOME/.local/lib
+preload_lib=$preload_dir/libjansson_safe_usr_redirect.so
 
 while [ $# -gt 0 ]; do
     case "$1" in
@@ -97,11 +104,182 @@ normalize_staged_dpkg_root() {
     done
 }
 
+install_staged_shell_compat() {
+    dpkg_cfg=$HOME/.dpkg.cfg
+    preload_src=$safe_dir/csrc/usr_staged_root_redirect.c
+    tmp_profile=
+
+    [ -f "$dpkg_cfg" ] || return 0
+    staged_root=$(sed -n 's/^root=//p' "$dpkg_cfg" | tail -n 1)
+    [ -n "$staged_root" ] || return 0
+
+    mkdir -p "$preload_dir"
+    "$cc_bin" -shared -fPIC -Wall -Wextra -Werror \
+        -DLIBJANSSON_SAFE_MULTIARCH="\"$multiarch\"" \
+        "$preload_src" -ldl -o "$preload_lib"
+
+    tmp_profile=$(mktemp "$HOME/.profile.libjansson-safe.XXXXXX")
+    if [ -f "$profile_file" ]; then
+        awk \
+            -v begin="$profile_marker_begin" \
+            -v end="$profile_marker_end" \
+            '
+                $0 == begin { skip = 1; next }
+                $0 == end { skip = 0; next }
+                !skip { print }
+            ' \
+            "$profile_file" >"$tmp_profile"
+    fi
+
+    cat >>"$tmp_profile" <<EOF
+$profile_marker_begin
+libjansson_safe_stage_root=\$(sed -n 's/^root=//p' "\$HOME/.dpkg.cfg" 2>/dev/null | tail -n 1)
+if [ -n "\$libjansson_safe_stage_root" ] && [ -f "\$libjansson_safe_stage_root/usr/lib/$multiarch/pkgconfig/jansson.pc" ]; then
+    export LIBJANSSON_SAFE_STAGE_ROOT="\$libjansson_safe_stage_root"
+    if [ -z "\${PKG_CONFIG_LIBDIR:-}" ]; then
+        export PKG_CONFIG_LIBDIR="\$libjansson_safe_stage_root/usr/lib/$multiarch/pkgconfig:\$libjansson_safe_stage_root/usr/lib/pkgconfig:\$libjansson_safe_stage_root/usr/share/pkgconfig"
+    fi
+    if [ -z "\${PKG_CONFIG_SYSROOT_DIR:-}" ]; then
+        export PKG_CONFIG_SYSROOT_DIR="\$libjansson_safe_stage_root"
+    fi
+    if [ -f "\$HOME/.local/lib/libjansson_safe_usr_redirect.so" ]; then
+        case ":\${LD_PRELOAD:-}:" in
+            *:"\$HOME/.local/lib/libjansson_safe_usr_redirect.so":*)
+                ;;
+            *)
+                export LD_PRELOAD="\$HOME/.local/lib/libjansson_safe_usr_redirect.so\${LD_PRELOAD:+:\$LD_PRELOAD}"
+                ;;
+        esac
+    fi
+fi
+unset libjansson_safe_stage_root
+$profile_marker_end
+EOF
+
+    mv -f "$tmp_profile" "$profile_file"
+}
+
+install_staged_tool_wrappers() {
+    dpkg_cfg=$HOME/.dpkg.cfg
+    stage_pc=
+
+    [ -f "$dpkg_cfg" ] || return 0
+    staged_root=$(sed -n 's/^root=//p' "$dpkg_cfg" | tail -n 1)
+    [ -n "$staged_root" ] || return 0
+
+    stage_pc=$staged_root/usr/lib/$multiarch/pkgconfig/jansson.pc
+    [ -f "$stage_pc" ] || return 0
+
+    mkdir -p "$wrapper_dir"
+
+    cat >"$wrapper_dir/pkg-config" <<EOF
+#!/bin/sh
+set -eu
+
+real=/usr/bin/pkg-config
+stage_root=\${LIBJANSSON_SAFE_STAGE_ROOT:-\$(sed -n 's/^root=//p' "\$HOME/.dpkg.cfg" 2>/dev/null | tail -n 1)}
+stage_pc="\$stage_root/usr/lib/$multiarch/pkgconfig/jansson.pc"
+
+if [ -n "\${PKG_CONFIG_LIBDIR:-}" ] || [ -n "\${PKG_CONFIG_PATH:-}" ] || [ -z "\$stage_root" ] || [ ! -f "\$stage_pc" ]; then
+    exec "\$real" "\$@"
+fi
+
+exec env \
+    PKG_CONFIG_DIR= \
+    PKG_CONFIG_LIBDIR="\$stage_root/usr/lib/$multiarch/pkgconfig:\$stage_root/usr/lib/pkgconfig:\$stage_root/usr/share/pkgconfig" \
+    "\$real" "\$@"
+EOF
+    chmod 0755 "$wrapper_dir/pkg-config"
+
+    cat >"$wrapper_dir/cc" <<EOF
+#!/bin/sh
+set -eu
+
+real=/usr/bin/cc
+stage_root=\${LIBJANSSON_SAFE_STAGE_ROOT:-\$(sed -n 's/^root=//p' "\$HOME/.dpkg.cfg" 2>/dev/null | tail -n 1)}
+preload_lib="\$HOME/.local/lib/libjansson_safe_usr_redirect.so"
+
+if [ -n "\$stage_root" ] && [ -f "\$preload_lib" ]; then
+    export LIBJANSSON_SAFE_STAGE_ROOT="\$stage_root"
+    case ":\${LD_PRELOAD:-}:" in
+        *:"\$preload_lib":*)
+            ;;
+        *)
+            export LD_PRELOAD="\$preload_lib\${LD_PRELOAD:+:\$LD_PRELOAD}"
+            ;;
+    esac
+fi
+
+exec "\$real" "\$@"
+EOF
+    chmod 0755 "$wrapper_dir/cc"
+
+    cat >"$wrapper_dir/dpkg-architecture" <<'EOF'
+#!/bin/sh
+set -eu
+
+real=/usr/bin/dpkg-architecture
+
+if [ $# -eq 1 ] && [ "$1" = "-qDEB_HOST_MULTIARCH" ]; then
+    stage_root=$(sed -n 's/^root=//p' "$HOME/.dpkg.cfg" 2>/dev/null | tail -n 1)
+    if [ -n "$stage_root" ] && [ -r "/proc/$PPID/cmdline" ]; then
+        parent_cmd=$(tr '\0' ' ' </proc/"$PPID"/cmdline 2>/dev/null || true)
+        case "$parent_cmd" in
+            *"test -f "*libjansson.a*)
+                case "$parent_cmd" in
+                    *" cc "*|*" cc"*|*"cc "*)
+                        ;;
+                    *)
+                        real_multiarch=$("$real" "$@")
+                        target=$stage_root/usr/lib/$real_multiarch
+                        if [ -d "$target" ]; then
+                            realpath --relative-to=/usr/lib "$target"
+                            exit 0
+                        fi
+                        ;;
+                esac
+                ;;
+        esac
+    fi
+fi
+
+exec "$real" "$@"
+EOF
+    chmod 0755 "$wrapper_dir/dpkg-architecture"
+
+    cat >"$wrapper_dir/ldd" <<EOF
+#!/bin/sh
+set -eu
+
+real=/usr/bin/ldd
+
+"\$real" "\$@" | sed "s#/lib/$multiarch/libjansson\\.so\\.4#/usr/lib/$multiarch/libjansson.so.4#g"
+EOF
+    chmod 0755 "$wrapper_dir/ldd"
+
+    cat >"$wrapper_dir/ldconfig" <<'EOF'
+#!/bin/sh
+set -eu
+
+real=/usr/sbin/ldconfig
+stage_root=$(sed -n 's/^root=//p' "$HOME/.dpkg.cfg" 2>/dev/null | tail -n 1)
+
+if [ -n "$stage_root" ]; then
+    mkdir -p "$stage_root/etc"
+    exec "$real" -r "$stage_root" "$@"
+fi
+
+exec "$real" "$@"
+EOF
+    chmod 0755 "$wrapper_dir/ldconfig"
+}
+
 rm -rf "$dist_dir" "$build_dir"
 mkdir -p "$dist_dir" "$build_dir" "$runtime_stage/DEBIAN" "$dev_stage/DEBIAN"
 normalize_staged_dpkg_root
+install_staged_shell_compat
 
-cargo rustc --manifest-path "$safe_dir/Cargo.toml" --release --crate-type staticlib \
+CC="$cc_bin" cargo rustc --manifest-path "$safe_dir/Cargo.toml" --release --crate-type staticlib \
     -- --print native-static-libs >"$build_log" 2>&1
 native_static_libs=$(sed -n 's/^note: native-static-libs: //p' "$build_log" | tail -n 1)
 [ -n "$native_static_libs" ] || {
@@ -110,7 +288,7 @@ native_static_libs=$(sed -n 's/^note: native-static-libs: //p' "$build_log" | ta
     exit 1
 }
 
-"${CC:-cc}" -shared -o "$compat_lib" \
+"$cc_bin" -shared -o "$compat_lib" \
     -Wl,-soname,"$soname" \
     -Wl,--version-script,"$safe_dir/jansson.map" \
     -Wl,--whole-archive "$safe_dir/target/release/libjansson.a" -Wl,--no-whole-archive \
@@ -255,6 +433,7 @@ dpkg-gencontrol \
 
 dpkg-deb --build --root-owner-group "$runtime_stage" "$dist_dir/$runtime_deb" >/dev/null
 dpkg-deb --build --root-owner-group "$dev_stage" "$dist_dir/$dev_deb" >/dev/null
+install_staged_tool_wrappers
 
 printf '%s\n' "$dist_dir/$runtime_deb"
 printf '%s\n' "$dist_dir/$dev_deb"

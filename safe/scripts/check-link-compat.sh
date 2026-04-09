@@ -7,6 +7,7 @@ usage() {
 }
 
 root=$(CDPATH= cd -- "$(dirname "$0")/../.." && pwd)
+. "$root/safe/scripts/installed-root-common.sh"
 safe_dir="$root/safe"
 upstream_root="$root/original/jansson-2.14"
 installed_root=
@@ -34,16 +35,10 @@ while [ $# -gt 0 ]; do
     esac
 done
 
-case "$installed_root" in
-    "")
-        installed_root=/
-        ;;
-    /*)
-        ;;
-    *)
-        installed_root=$root/$installed_root
-        ;;
-esac
+if [ -z "$installed_root" ]; then
+    installed_root=/
+fi
+installed_root=$(resolve_installed_root "$root" "$installed_root")
 
 [ -n "$runtime_version" ] || {
     echo "failed to resolve ABI runtime version from safe/build.rs" >&2
