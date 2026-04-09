@@ -473,6 +473,15 @@ unsafe fn set_borrowed_nocheck(
     unsafe { set_new_nocheck_inner(object, key, key_len, borrowed) }
 }
 
+unsafe fn set_borrowed_cstr_nocheck(
+    object: *mut json_t,
+    key: *const c_char,
+    value: *mut json_t,
+) -> c_int {
+    let key_len = unsafe { libc::strlen(key) };
+    unsafe { set_borrowed_nocheck(object, key, key_len, value) }
+}
+
 unsafe fn delete_inner(object: *mut JsonObject) {
     unsafe {
         (*object).table.close(|node| {
@@ -499,13 +508,7 @@ pub(crate) unsafe fn equal_object(object1: *const json_t, object2: *const json_t
     let mut iter = unsafe { ordered_first(object1_ptr) };
     while !iter.is_null() {
         let entry = unsafe { entry_from_order_link(iter) };
-        let value2 = unsafe {
-            getn_inner(
-                object2.cast_mut(),
-                entry_key_ptr(entry),
-                (*entry).key_len,
-            )
-        };
+        let value2 = unsafe { json_object_get(object2, entry_key_ptr(entry)) };
         if crate::scalar::json_equal(unsafe { (*entry).value }.cast_const(), value2.cast_const()) == 0 {
             return false;
         }
@@ -525,10 +528,7 @@ pub(crate) unsafe fn copy_object(object: *mut json_t) -> *mut json_t {
     let mut iter = unsafe { ordered_first(object_ptr) };
     while !iter.is_null() {
         let entry = unsafe { entry_from_order_link(iter) };
-        if unsafe {
-            set_borrowed_nocheck(result, entry_key_ptr(entry), (*entry).key_len, (*entry).value)
-        } != 0
-        {
+        if unsafe { set_borrowed_cstr_nocheck(result, entry_key_ptr(entry), (*entry).value) } != 0 {
             unsafe {
                 decref(result);
             }
@@ -565,9 +565,7 @@ pub(crate) unsafe fn deep_copy_object(
     while !iter.is_null() {
         let entry = unsafe { entry_from_order_link(iter) };
         let deep = unsafe { crate::scalar::do_deep_copy((*entry).value.cast_const(), parents) };
-        if deep.is_null()
-            || unsafe { set_new_nocheck_inner(copied, entry_key_ptr(entry), (*entry).key_len, deep) } != 0
-        {
+        if deep.is_null() || unsafe { json_object_set_new_nocheck(copied, entry_key_ptr(entry), deep) } != 0 {
             unsafe {
                 decref(copied);
                 copied = null_mut();
@@ -817,10 +815,7 @@ pub extern "C" fn json_object_update(object: *mut json_t, other: *mut json_t) ->
     let mut iter = unsafe { ordered_first(other_ptr) };
     while !iter.is_null() {
         let entry = unsafe { entry_from_order_link(iter) };
-        if unsafe {
-            set_borrowed_nocheck(object, entry_key_ptr(entry), (*entry).key_len, (*entry).value)
-        } != 0
-        {
+        if unsafe { set_borrowed_cstr_nocheck(object, entry_key_ptr(entry), (*entry).value) } != 0 {
             return -1;
         }
         iter = unsafe { ordered_next(other_ptr, iter) };
@@ -862,10 +857,8 @@ pub extern "C" fn json_object_update_missing(object: *mut json_t, other: *mut js
     let mut iter = unsafe { ordered_first(other_ptr) };
     while !iter.is_null() {
         let entry = unsafe { entry_from_order_link(iter) };
-        if unsafe { getn_inner(object, entry_key_ptr(entry), (*entry).key_len) }.is_null()
-            && unsafe {
-                set_borrowed_nocheck(object, entry_key_ptr(entry), (*entry).key_len, (*entry).value)
-            } != 0
+        if unsafe { json_object_get(object.cast_const(), entry_key_ptr(entry)) }.is_null()
+            && unsafe { set_borrowed_cstr_nocheck(object, entry_key_ptr(entry), (*entry).value) } != 0
         {
             return -1;
         }

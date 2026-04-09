@@ -208,10 +208,68 @@ static void test_copy_equal_and_updates(void) {
     json_decref(nested);
 }
 
+static void test_binary_key_foreach_compat(void) {
+    const char binary_key[] = {'b', '\0', 'x'};
+    json_t *binary_only_a = json_object();
+    json_t *binary_only_b = json_object();
+    json_t *plain = json_object();
+    json_t *copy;
+    json_t *deep;
+    json_t *update_dst = json_object();
+    json_t *update_missing_dst = json_object();
+
+    check(binary_only_a && binary_only_b && plain && update_dst && update_missing_dst,
+          "failed to allocate binary-key compat objects");
+
+    check(json_object_setn_new_nocheck(binary_only_a, binary_key, sizeof(binary_key), json_true()) == 0,
+          "binary_only_a init failed");
+    check(json_object_setn_new_nocheck(binary_only_b, binary_key, sizeof(binary_key), json_true()) == 0,
+          "binary_only_b init failed");
+    check(json_object_set_new(plain, "b", json_true()) == 0, "plain init failed");
+
+    copy = json_copy(binary_only_a);
+    deep = json_deep_copy(binary_only_a);
+    check(copy && deep, "binary-key copy/deep-copy failed");
+    check(json_object_get(copy, "b") == json_true(), "json_copy did not use cstring key semantics");
+    check(json_object_getn(copy, binary_key, sizeof(binary_key)) == NULL,
+          "json_copy preserved full binary key unexpectedly");
+    check(json_object_get(deep, "b") == json_true(),
+          "json_deep_copy did not use cstring key semantics");
+    check(json_object_getn(deep, binary_key, sizeof(binary_key)) == NULL,
+          "json_deep_copy preserved full binary key unexpectedly");
+
+    check(!json_equal(binary_only_a, binary_only_b),
+          "json_equal unexpectedly preserved full binary key length");
+    check(json_equal(binary_only_a, plain),
+          "json_equal should compare via cstring iterator keys");
+
+    check(json_object_update(update_dst, binary_only_a) == 0, "json_object_update failed");
+    check(json_object_get(update_dst, "b") == json_true(),
+          "json_object_update did not use cstring key semantics");
+    check(json_object_getn(update_dst, binary_key, sizeof(binary_key)) == NULL,
+          "json_object_update preserved full binary key unexpectedly");
+
+    check(json_object_update_missing(update_missing_dst, binary_only_a) == 0,
+          "json_object_update_missing failed");
+    check(json_object_get(update_missing_dst, "b") == json_true(),
+          "json_object_update_missing did not use cstring key semantics");
+    check(json_object_getn(update_missing_dst, binary_key, sizeof(binary_key)) == NULL,
+          "json_object_update_missing preserved full binary key unexpectedly");
+
+    json_decref(update_missing_dst);
+    json_decref(update_dst);
+    json_decref(deep);
+    json_decref(copy);
+    json_decref(plain);
+    json_decref(binary_only_b);
+    json_decref(binary_only_a);
+}
+
 int main(void) {
     test_iteration_and_roundtrip();
     test_fixed_keys();
     test_copy_equal_and_updates();
+    test_binary_key_foreach_compat();
     return 0;
 }
 EOF
