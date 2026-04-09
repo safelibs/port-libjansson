@@ -47,6 +47,38 @@ safe/scripts/run-data-suites.sh --installed-dev --installed-root "$install_root"
 safe/scripts/check-link-compat.sh --installed-root "$install_root"
 ```
 
+Run the downstream-dependent harnesses from the repository root with the parameterized entrypoint:
+
+```sh
+./test-original.sh
+JANSSON_IMPLEMENTATION=safe JANSSON_TEST_MODE=runtime ./test-original.sh
+JANSSON_IMPLEMENTATION=safe JANSSON_TEST_MODE=build ./test-original.sh
+./test-safe.sh
+```
+
+Mode semantics:
+
+- `JANSSON_IMPLEMENTATION=original` keeps the original runtime baseline as the default. Runtime mode builds upstream `original/jansson-2.14` into `/usr/local` and exercises the existing smoke tests against that overlay.
+- In `JANSSON_TEST_MODE=build`, `JANSSON_IMPLEMENTATION=original` uses Ubuntu's archive `libjansson4` and `libjansson-dev` packages as the package-manager compile baseline.
+- `JANSSON_IMPLEMENTATION=safe` builds `safe/dist/libjansson4_*.deb` and `safe/dist/libjansson-dev_*.deb`, installs them with `dpkg -i`, and exercises the same downstream smoke tests as an actual system-package replacement.
+- `JANSSON_TEST_MODE=build` skips the runtime smoke tests and instead invokes [`safe/scripts/check-dependent-builds.sh`](/home/yans/safelibs/port-libjansson/safe/scripts/check-dependent-builds.sh).
+- `JANSSON_TEST_MODE=runtime` only runs the downstream binary smoke tests.
+- `JANSSON_TEST_MODE=all` runs the package-based dependent rebuild harness first and then the runtime smoke tests.
+
+The dependent rebuild harness is driven directly from [`dependents.json`](/home/yans/safelibs/port-libjansson/dependents.json). In safe mode it installs and pins the locally built `libjansson4` and `libjansson-dev` packages before rebuilding every unique source package in the manifest:
+
+- `emacs`
+- `janus`
+- `jose`
+- `jshon`
+- `libteam`
+- `mtr`
+- `suricata`
+- `tang`
+- `ulogd2`
+- `wayvnc`
+- `webdis`
+
 The bulk API and data-suite runners always consume the checked-in mirror under `safe/tests/`; refresh that mirror only through `safe/scripts/sync-upstream-tests.sh --sync`.
 
 Compatibility scope and verification details live in [COMPATIBILITY.md](/home/yans/safelibs/port-libjansson/safe/COMPATIBILITY.md).

@@ -21,6 +21,36 @@ This phase establishes the first end-to-end compatibility contract for the safe 
 - `safe/scripts/run-upstream-api-tests.sh --installed-dev --installed-root <root> --all` runs those same 18 mirrored API tests against the installed shared library selected through the installed package's `pkg-config` file.
 - `safe/scripts/run-data-suites.sh valid invalid invalid-unicode encoding-flags` uses the mirrored `safe/tests/upstream-suites/**` corpus in build-tree mode.
 - `safe/scripts/run-data-suites.sh --installed-dev --installed-root <root> ...` uses that same mirrored corpus while compiling `json_process` against the installed static archive surface.
+- [`test-original.sh`](/home/yans/safelibs/port-libjansson/test-original.sh) is the authoritative downstream runtime entrypoint and now accepts:
+  - `JANSSON_IMPLEMENTATION=original|safe`
+  - `JANSSON_TEST_MODE=build|runtime|all`
+- The default invocation (`./test-original.sh`) preserves the original runtime baseline: it builds `original/jansson-2.14` into `/usr/local`, exports `LD_LIBRARY_PATH`, and runs the downstream smoke tests against that overlay.
+- Safe runtime mode builds the local `.deb` packages with `safe/scripts/build-deb.sh`, installs them with `dpkg -i`, and then runs the same dependent smoke tests against the actual system-package replacement.
+- The ulogd JSON-plugin linkage probe no longer hard-codes an architecture path; it resolves the active plugin location from the installed package contents before asserting linkage.
+
+## Downstream Build Compatibility
+
+- [`safe/scripts/check-dependent-builds.sh`](/home/yans/safelibs/port-libjansson/safe/scripts/check-dependent-builds.sh) is the authoritative compile-compatibility harness for every unique `source_package` named in [`dependents.json`](/home/yans/safelibs/port-libjansson/dependents.json).
+- `JANSSON_IMPLEMENTATION=original` uses Ubuntu's archive `libjansson4` and `libjansson-dev` packages as the package-manager compile baseline; `JANSSON_IMPLEMENTATION=safe` switches that same harness to the locally built replacement packages.
+- The harness parses the manifest with `jq -r '.dependents[].source_package' dependents.json | sort -u` and currently rebuilds exactly these 11 Ubuntu 24.04 source packages:
+  - `emacs`
+  - `janus`
+  - `jose`
+  - `jshon`
+  - `libteam`
+  - `mtr`
+  - `suricata`
+  - `tang`
+  - `ulogd2`
+  - `wayvnc`
+  - `webdis`
+- In safe mode the harness installs the locally built `libjansson4` and `libjansson-dev` packages first, pins their exact versions in `/etc/apt/preferences.d/`, and marks them held so `apt-get build-dep` cannot silently replace them with the Ubuntu archive build.
+- The rebuild sequence for each dependent is:
+  - enable `deb-src` entries when the container image lacks source repositories
+  - `apt-get source "$srcpkg"`
+  - `apt-get build-dep -y "$srcpkg"`
+  - `DEB_BUILD_OPTIONS=nocheck dpkg-buildpackage -B -uc -us`
+- Any build failure, missing source package, or Jansson package-version drift aborts the harness immediately.
 
 ## Packaging Compatibility
 

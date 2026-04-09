@@ -3,8 +3,34 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DOCKER_IMAGE="${DOCKER_IMAGE:-ubuntu:24.04}"
+JANSSON_IMPLEMENTATION="${JANSSON_IMPLEMENTATION:-original}"
+JANSSON_TEST_MODE="${JANSSON_TEST_MODE:-runtime}"
+
+case "${JANSSON_IMPLEMENTATION}" in
+  original|safe)
+    ;;
+  *)
+    printf 'ERROR: Unsupported JANSSON_IMPLEMENTATION=%s (expected original or safe)\n' \
+      "${JANSSON_IMPLEMENTATION}" >&2
+    exit 1
+    ;;
+esac
+
+case "${JANSSON_TEST_MODE}" in
+  build|runtime|all)
+    ;;
+  *)
+    printf 'ERROR: Unsupported JANSSON_TEST_MODE=%s (expected build, runtime, or all)\n' \
+      "${JANSSON_TEST_MODE}" >&2
+    exit 1
+    ;;
+esac
 
 docker run --rm -i \
+  -e HOST_UID="$(id -u)" \
+  -e HOST_GID="$(id -g)" \
+  -e JANSSON_IMPLEMENTATION \
+  -e JANSSON_TEST_MODE \
   -v "${ROOT_DIR}:/work" \
   -w /work \
   "${DOCKER_IMAGE}" \
@@ -12,6 +38,57 @@ docker run --rm -i \
 set -euo pipefail
 
 export DEBIAN_FRONTEND=noninteractive
+
+JANSSON_IMPLEMENTATION="${JANSSON_IMPLEMENTATION:-original}"
+JANSSON_TEST_MODE="${JANSSON_TEST_MODE:-runtime}"
+HOST_UID="${HOST_UID:-}"
+HOST_GID="${HOST_GID:-}"
+
+case "${JANSSON_IMPLEMENTATION}" in
+  original|safe)
+    ;;
+  *)
+    printf 'ERROR: Unsupported JANSSON_IMPLEMENTATION=%s (expected original or safe)\n' \
+      "${JANSSON_IMPLEMENTATION}" >&2
+    exit 1
+    ;;
+esac
+
+case "${JANSSON_TEST_MODE}" in
+  build|runtime|all)
+    ;;
+  *)
+    printf 'ERROR: Unsupported JANSSON_TEST_MODE=%s (expected build, runtime, or all)\n' \
+      "${JANSSON_TEST_MODE}" >&2
+    exit 1
+    ;;
+esac
+
+RUN_BUILD=0
+RUN_RUNTIME=0
+
+case "${JANSSON_TEST_MODE}" in
+  build)
+    RUN_BUILD=1
+    ;;
+  runtime)
+    RUN_RUNTIME=1
+    ;;
+  all)
+    RUN_BUILD=1
+    RUN_RUNTIME=1
+    ;;
+esac
+
+MULTIARCH=
+SELECTED_JANSSON=
+SELECTED_LABEL=
+SAFE_RUNTIME_DEB=
+SAFE_DEV_DEB=
+ULOGD_PLUGIN_DIR=
+ULOGD_INPUT_PLUGIN=
+ULOGD_BASE_PLUGIN=
+ULOGD_OUTPUT_PLUGIN=
 
 note() {
   printf '\n==> %s\n' "$1"
@@ -21,6 +98,19 @@ fail() {
   printf 'ERROR: %s\n' "$*" >&2
   exit 1
 }
+
+repair_workspace_permissions() {
+  [ -n "${HOST_UID}" ] || return 0
+  [ -n "${HOST_GID}" ] || return 0
+
+  chown -R "${HOST_UID}:${HOST_GID}" \
+    /work/safe/.build \
+    /work/safe/dist \
+    /work/safe/target \
+    2>/dev/null || true
+}
+
+trap repair_workspace_permissions EXIT
 
 random_port() {
   python3 - <<'PY'
@@ -63,75 +153,145 @@ wait_for_socket() {
   fail "Timed out waiting for socket ${path}"
 }
 
-assert_uses_local_jansson() {
+assert_uses_selected_jansson() {
   local bin="$1"
   local resolved
 
   resolved="$(ldd "${bin}" | awk '/libjansson\.so\.4/ { print $3; exit }')"
   [ -n "${resolved}" ] || fail "${bin} does not resolve libjansson.so.4"
-  [ "${resolved}" = "${LOCAL_JANSSON}" ] || fail "${bin} resolved libjansson.so.4 to ${resolved}, expected ${LOCAL_JANSSON}"
+
+  resolved="$(readlink -f "${resolved}")"
+  [ "${resolved}" = "${SELECTED_JANSSON}" ] || fail \
+    "${bin} resolved libjansson.so.4 to ${resolved}, expected ${SELECTED_JANSSON} (${SELECTED_LABEL})"
 }
 
-note "Installing toolchain and dependent packages"
-apt-get update
-apt-get install -y --no-install-recommends \
-  autoconf \
-  automake \
-  build-essential \
-  ca-certificates \
-  curl \
-  emacs-nox \
-  iproute2 \
-  janus \
-  jose \
-  jshon \
-  libteam-utils \
-  mtr-tiny \
-  procps \
-  python3 \
-  redis-server \
-  suricata \
-  tang-common \
-  ulogd2 \
-  ulogd2-json \
-  libtool \
-  wayvnc \
-  webdis
+install_mode_packages() {
+  local packages=()
 
-note "Building and installing the original Jansson source"
-rm -rf /tmp/jansson-src
-cp -a /work/original/jansson-2.14 /tmp/jansson-src
-(
-  cd /tmp/jansson-src
-  autoreconf -fi
-  ./configure --prefix=/usr/local
-  make -j"$(getconf _NPROCESSORS_ONLN)"
-  make install
-)
-ldconfig
+  if [ "${RUN_BUILD}" -eq 1 ]; then
+    packages+=(
+      build-essential
+      ca-certificates
+      dpkg-dev
+      jq
+    )
+  fi
 
-LOCAL_JANSSON="$(find /usr/local -name 'libjansson.so.4' -type l | head -n 1)"
-[ -n "${LOCAL_JANSSON}" ] || fail "Failed to find the installed /usr/local libjansson.so.4"
-LOCAL_LIBDIR="$(dirname "${LOCAL_JANSSON}")"
-export LD_LIBRARY_PATH="${LOCAL_LIBDIR}${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+  if [ "${RUN_RUNTIME}" -eq 1 ]; then
+    packages+=(
+      ca-certificates
+      curl
+      dpkg-dev
+      emacs-nox
+      iproute2
+      janus
+      jose
+      jshon
+      libteam-utils
+      mtr-tiny
+      procps
+      python3
+      redis-server
+      suricata
+      tang-common
+      ulogd2
+      ulogd2-json
+      wayvnc
+      webdis
+    )
+  fi
 
-note "Verifying that each exercised binary resolves libjansson from /usr/local"
-for bin in \
-  /usr/bin/emacs \
-  /usr/bin/janus \
-  /usr/bin/jose \
-  /usr/bin/jshon \
-  /usr/bin/mtr \
-  /usr/bin/suricata \
-  /usr/libexec/tangd \
-  /usr/bin/teamd \
-  /usr/bin/teamdctl \
-  /usr/lib/x86_64-linux-gnu/ulogd/ulogd_output_JSON.so \
-  /usr/bin/wayvnc \
-  /usr/bin/wayvncctl \
-  /usr/bin/webdis; do
-  assert_uses_local_jansson "${bin}"
-done
+  case "${JANSSON_IMPLEMENTATION}" in
+    original)
+      if [ "${RUN_RUNTIME}" -eq 1 ]; then
+        packages+=(
+          autoconf
+          automake
+          build-essential
+          libtool
+        )
+      fi
+      ;;
+    safe)
+      packages+=(
+        build-essential
+        cargo
+        rustc
+      )
+      ;;
+  esac
+
+  note "Installing toolchain and package prerequisites"
+  apt-get update
+  apt-get install -y --no-install-recommends "${packages[@]}"
+
+  MULTIARCH="$(dpkg-architecture -qDEB_HOST_MULTIARCH)"
+}
+
+build_safe_packages() {
+  local safe_debs=()
+
+  note "Building Ubuntu replacement packages from the safe port"
+  mapfile -t safe_debs < <(/work/safe/scripts/build-deb.sh)
+  [ "${#safe_debs[@]}" -eq 2 ] || fail "safe/scripts/build-deb.sh did not emit the expected runtime/dev package paths"
+
+  SAFE_RUNTIME_DEB="${safe_debs[0]}"
+  SAFE_DEV_DEB="${safe_debs[1]}"
+  [ -f "${SAFE_RUNTIME_DEB}" ] || fail "Missing safe runtime package ${SAFE_RUNTIME_DEB}"
+  [ -f "${SAFE_DEV_DEB}" ] || fail "Missing safe development package ${SAFE_DEV_DEB}"
+}
+
+install_original_jansson() {
+  note "Building and installing the original Jansson source"
+  rm -rf /tmp/jansson-src
+  cp -a /work/original/jansson-2.14 /tmp/jansson-src
+  (
+    cd /tmp/jansson-src
+    autoreconf -fi
+    ./configure --prefix=/usr/local
+    make -j"$(getconf _NPROCESSORS_ONLN)"
+    make install
+  )
+  ldconfig
+
+  SELECTED_JANSSON="$(find /usr/local -name 'libjansson.so.4' -type l | head -n 1)"
+  [ -n "${SELECTED_JANSSON}" ] || fail "Failed to find the installed /usr/local libjansson.so.4"
+  export LD_LIBRARY_PATH="$(dirname "${SELECTED_JANSSON}")${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+  SELECTED_JANSSON="$(readlink -f "${SELECTED_JANSSON}")"
+  SELECTED_LABEL="the original /usr/local build"
+}
+
+install_safe_jansson() {
+  [ -n "${SAFE_RUNTIME_DEB}" ] || fail "Safe runtime package path is unset"
+  [ -n "${SAFE_DEV_DEB}" ] || fail "Safe development package path is unset"
+
+  note "Installing locally built safe libjansson packages with dpkg -i"
+  dpkg -i "${SAFE_RUNTIME_DEB}" "${SAFE_DEV_DEB}"
+  ldconfig
+
+  SELECTED_JANSSON="$(dpkg-query -L libjansson4 | awk '/\/libjansson\.so\.4\.[0-9]/ { print; exit }')"
+  [ -n "${SELECTED_JANSSON}" ] || fail "Failed to resolve the installed safe libjansson runtime path"
+  SELECTED_JANSSON="$(readlink -f "${SELECTED_JANSSON}")"
+  SELECTED_LABEL="the installed safe libjansson package"
+}
+
+resolve_ulogd_plugins() {
+  ULOGD_OUTPUT_PLUGIN="$(dpkg-query -L ulogd2-json | awk '/\/ulogd_output_JSON\.so$/ { print; exit }')"
+  [ -n "${ULOGD_OUTPUT_PLUGIN}" ] || fail "Failed to resolve ulogd_output_JSON.so from ulogd2-json"
+
+  ULOGD_PLUGIN_DIR="$(dirname "${ULOGD_OUTPUT_PLUGIN}")"
+  ULOGD_INPUT_PLUGIN="${ULOGD_PLUGIN_DIR}/ulogd_inppkt_UNIXSOCK.so"
+  ULOGD_BASE_PLUGIN="${ULOGD_PLUGIN_DIR}/ulogd_raw2packet_BASE.so"
+
+  [ -f "${ULOGD_INPUT_PLUGIN}" ] || fail "Missing ${ULOGD_INPUT_PLUGIN}"
+  [ -f "${ULOGD_BASE_PLUGIN}" ] || fail "Missing ${ULOGD_BASE_PLUGIN}"
+  [ -f "${ULOGD_OUTPUT_PLUGIN}" ] || fail "Missing ${ULOGD_OUTPUT_PLUGIN}"
+}
+
+run_build_harness() {
+  note "Rebuilding dependent Ubuntu source packages against ${JANSSON_IMPLEMENTATION} libjansson"
+  JANSSON_IMPLEMENTATION="${JANSSON_IMPLEMENTATION}" /work/safe/scripts/check-dependent-builds.sh
+}
 
 test_emacs() {
   note "Testing Emacs JSON support"
@@ -383,13 +543,13 @@ test_ulogd() (
   local pid=""
   trap 'kill "${pid}" 2>/dev/null || true; wait "${pid}" 2>/dev/null || true' EXIT
 
-  cat >/tmp/ulogd-test.conf <<'EOF'
+  cat >/tmp/ulogd-test.conf <<EOF
 [global]
 logfile="stdout"
 loglevel=3
-plugin="/usr/lib/x86_64-linux-gnu/ulogd/ulogd_inppkt_UNIXSOCK.so"
-plugin="/usr/lib/x86_64-linux-gnu/ulogd/ulogd_raw2packet_BASE.so"
-plugin="/usr/lib/x86_64-linux-gnu/ulogd/ulogd_output_JSON.so"
+plugin="${ULOGD_INPUT_PLUGIN}"
+plugin="${ULOGD_BASE_PLUGIN}"
+plugin="${ULOGD_OUTPUT_PLUGIN}"
 stack=us1:UNIXSOCK,base1:BASE,json1:JSON
 
 [us1]
@@ -541,7 +701,6 @@ test_webdis() (
   local redis_port
   local http_port
   local pid=""
-  local i
 
   redis_port="$(random_port)"
   http_port="$(random_port)"
@@ -582,17 +741,57 @@ assert get_result["GET"] == "testvalue"
 PY
 )
 
-test_emacs
-test_janus
-test_jshon
-test_jose
-test_mtr
-test_suricata
-test_tang
-test_teamd
-test_ulogd
-test_wayvnc
-test_webdis
+run_runtime_smoke_tests() {
+  resolve_ulogd_plugins
 
-note "All dependent smoke tests passed against the original Jansson build"
+  note "Verifying that each exercised binary resolves libjansson from ${SELECTED_LABEL}"
+  for bin in \
+    /usr/bin/emacs \
+    /usr/bin/janus \
+    /usr/bin/jose \
+    /usr/bin/jshon \
+    /usr/bin/mtr \
+    /usr/bin/suricata \
+    /usr/libexec/tangd \
+    /usr/bin/teamd \
+    /usr/bin/teamdctl \
+    "${ULOGD_OUTPUT_PLUGIN}" \
+    /usr/bin/wayvnc \
+    /usr/bin/wayvncctl \
+    /usr/bin/webdis; do
+    assert_uses_selected_jansson "${bin}"
+  done
+
+  test_emacs
+  test_janus
+  test_jshon
+  test_jose
+  test_mtr
+  test_suricata
+  test_tang
+  test_teamd
+  test_ulogd
+  test_wayvnc
+  test_webdis
+
+  note "All dependent smoke tests passed against ${SELECTED_LABEL}"
+}
+
+install_mode_packages
+
+if [ "${JANSSON_IMPLEMENTATION}" = "safe" ]; then
+  build_safe_packages
+  install_safe_jansson
+fi
+
+if [ "${RUN_BUILD}" -eq 1 ]; then
+  run_build_harness
+fi
+
+if [ "${RUN_RUNTIME}" -eq 1 ]; then
+  if [ "${JANSSON_IMPLEMENTATION}" = "original" ]; then
+    install_original_jansson
+  fi
+  run_runtime_smoke_tests
+fi
 CONTAINER
