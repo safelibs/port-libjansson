@@ -71,8 +71,35 @@ dev_files="$build_dir/libjansson-dev.files"
 runtime_deb="libjansson4_${version}_${arch}.deb"
 dev_deb="libjansson-dev_${version}_${arch}.deb"
 
+normalize_staged_dpkg_root() {
+    dpkg_cfg=$HOME/.dpkg.cfg
+
+    [ -f "$dpkg_cfg" ] || return 0
+
+    staged_root=$(sed -n 's/^root=//p' "$dpkg_cfg" | tail -n 1)
+    [ -n "$staged_root" ] || return 0
+
+    admindir=$staged_root/var/lib/dpkg
+    [ -d "$admindir" ] || return 0
+
+    for admin_file in status status-old; do
+        path=$admindir/$admin_file
+        [ -e "$path" ] || continue
+
+        if [ -O "$path" ]; then
+            continue
+        fi
+
+        tmp_path=$admindir/$admin_file.tmp-safe
+        cp "$path" "$tmp_path"
+        chmod u+rw "$tmp_path"
+        mv -f "$tmp_path" "$path"
+    done
+}
+
 rm -rf "$dist_dir" "$build_dir"
 mkdir -p "$dist_dir" "$build_dir" "$runtime_stage/DEBIAN" "$dev_stage/DEBIAN"
+normalize_staged_dpkg_root
 
 cargo rustc --manifest-path "$safe_dir/Cargo.toml" --release --crate-type staticlib \
     -- --print native-static-libs >"$build_log" 2>&1
