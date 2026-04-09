@@ -4,9 +4,12 @@ set -eu
 root=$(CDPATH= cd -- "$(dirname "$0")/../.." && pwd)
 safe_dir="$root/safe"
 build_dir="$safe_dir/.build/checks"
+runtime_dir="$build_dir/runtime-lib"
 mkdir -p "$build_dir"
 
 cargo build --release --manifest-path "$safe_dir/Cargo.toml"
+mkdir -p "$runtime_dir"
+ln -sfn "$safe_dir/target/release/libjansson.so" "$runtime_dir/libjansson.so.4"
 
 src="$build_dir/check_allocator_hooks.c"
 exe="$build_dir/check_allocator_hooks"
@@ -83,8 +86,20 @@ EOF
     -I"$safe_dir/include" \
     "$src" \
     -L"$safe_dir/target/release" \
-    -Wl,-rpath,"$safe_dir/target/release" \
+    -Wl,-rpath,"$runtime_dir" \
     -ljansson \
     -o "$exe"
 
-LD_LIBRARY_PATH="$safe_dir/target/release${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" "$exe"
+expected=$(readlink -f "$safe_dir/target/release/libjansson.so")
+actual=$(ldd "$exe" | awk '/libjansson\.so\.4/ { print $3; exit }')
+[ -n "$actual" ] || {
+    echo "failed to resolve libjansson.so.4 for $exe" >&2
+    exit 1
+}
+actual=$(readlink -f "$actual")
+[ "$actual" = "$expected" ] || {
+    echo "expected $exe to use $expected but it resolved to $actual" >&2
+    exit 1
+}
+
+LD_LIBRARY_PATH="$runtime_dir${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" "$exe"

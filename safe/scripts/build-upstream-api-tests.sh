@@ -64,12 +64,32 @@ mkdir -p "$build_dir"
 : >"$manifest"
 
 cc_bin=${CC:-cc}
+runtime_dir="$build_dir/runtime-lib"
+
+verify_safe_linkage() {
+    exe=$1
+    expected=$(readlink -f "$safe_dir/target/release/libjansson.so")
+    actual=$(ldd "$exe" | awk '/libjansson\.so\.4/ { print $3; exit }')
+
+    [ -n "$actual" ] || {
+        echo "failed to resolve libjansson.so.4 for $exe" >&2
+        exit 1
+    }
+
+    actual=$(readlink -f "$actual")
+    [ "$actual" = "$expected" ] || {
+        echo "expected $exe to use $expected but it resolved to $actual" >&2
+        exit 1
+    }
+}
 
 case "$mode" in
     build-tree)
         cargo build --release --manifest-path "$safe_dir/Cargo.toml"
+        mkdir -p "$runtime_dir"
+        ln -sfn "$safe_dir/target/release/libjansson.so" "$runtime_dir/libjansson.so.4"
         include_flags="-I$safe_dir/include"
-        link_flags="-L$safe_dir/target/release -Wl,-rpath,$safe_dir/target/release -ljansson"
+        link_flags="-L$safe_dir/target/release -Wl,-rpath,$runtime_dir -ljansson"
         ;;
     installed-dev)
         include_flags=$(pkg-config --cflags jansson)
@@ -91,6 +111,11 @@ for test_name in "$@"; do
     }
 
     "$cc_bin" -std=c99 -Wall -Wextra -Werror $include_flags "$src" -o "$exe" $link_flags
+
+    if [ "$mode" = "build-tree" ]; then
+        verify_safe_linkage "$exe"
+    fi
+
     printf '%s\n' "$base" >>"$manifest"
 done
 

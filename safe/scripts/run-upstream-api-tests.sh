@@ -46,6 +46,7 @@ done
 build_script="$safe_dir/scripts/build-upstream-api-tests.sh"
 build_dir="$safe_dir/.build/api-tests/$mode"
 manifest="$build_dir/manifest.txt"
+runtime_dir="$build_dir/runtime-lib"
 
 run_build() {
     if [ "$build_all" -eq 1 ]; then
@@ -89,7 +90,8 @@ for test_name in "$@"; do
     }
 
     if [ "$mode" = "build-tree" ]; then
-        LD_LIBRARY_PATH="$lib_path${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" "$exe"
+        [ -d "$runtime_dir" ] || run_build "$test_name"
+        LD_LIBRARY_PATH="$runtime_dir${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" "$exe"
     else
         "$exe"
     fi
