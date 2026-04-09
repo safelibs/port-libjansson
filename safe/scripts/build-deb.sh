@@ -11,6 +11,7 @@ safe_dir="$root/safe"
 pkg_dir="$safe_dir/pkg"
 build_dir=
 dist_dir="$safe_dir/dist"
+symbols_source="$root/original/jansson-2.14/debian/libjansson4.symbols"
 version=${JANSSON_DEB_VERSION:-2.14-2build2+safe1}
 wrapper_dir=$HOME/.local/bin
 sanitized_path=
@@ -86,6 +87,8 @@ dev_substvars="$build_dir/libjansson-dev.substvars"
 control_file="$build_dir/control"
 changelog_file="$build_dir/changelog"
 debian_dir="$build_dir/debian"
+runtime_symbols="$runtime_stage/DEBIAN/symbols"
+runtime_shlibs="$runtime_stage/DEBIAN/shlibs"
 runtime_files="$build_dir/libjansson4.files"
 dev_files="$build_dir/libjansson-dev.files"
 runtime_deb="libjansson4_${version}_${arch}.deb"
@@ -289,6 +292,17 @@ install_manifest() {
 
 install_manifest "$runtime_stage" "$pkg_dir/install-manifest.libjansson4"
 install_manifest "$dev_stage" "$pkg_dir/install-manifest.libjansson-dev"
+
+[ -f "$symbols_source" ] || {
+    echo "missing upstream symbols metadata: $symbols_source" >&2
+    exit 1
+}
+cp "$symbols_source" "$runtime_symbols"
+chmod 0644 "$runtime_symbols"
+cat >"$runtime_shlibs" <<EOF
+libjansson 4 libjansson4 (>= $api_version)
+EOF
+chmod 0644 "$runtime_shlibs"
 
 cat >"$control_file" <<'EOF'
 Source: jansson
