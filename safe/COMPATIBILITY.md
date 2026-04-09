@@ -50,6 +50,7 @@ This phase establishes the first end-to-end compatibility contract for the safe 
   - `apt-get source "$srcpkg"`
   - `apt-get build-dep -y "$srcpkg"`
   - `DEB_BUILD_OPTIONS=nocheck dpkg-buildpackage -B -uc -us`
+- The Emacs rebuild uses Debian's packaged `EMACS_INHIBIT_NATIVE_COMPILATION=1` switch during `dpkg-buildpackage` so containerized rebuilds do not fail in `dh_strip` on transient `.eln` artifacts unrelated to the libjansson dependency edge under test.
 - Any build failure, missing source package, or Jansson package-version drift aborts the harness immediately.
 
 ## Packaging Compatibility

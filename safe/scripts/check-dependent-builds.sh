@@ -168,6 +168,29 @@ install_selected_packages
 
 note "Building dependent source packages"
 
+build_source_package() {
+  local srcpkg="$1"
+
+  case "${srcpkg}" in
+    emacs)
+      note "Compiling ${srcpkg} with DEB_BUILD_OPTIONS=nocheck and EMACS_INHIBIT_NATIVE_COMPILATION=1"
+      (
+        cd "${srcdir}"
+        EMACS_INHIBIT_NATIVE_COMPILATION=1 \
+          DEB_BUILD_OPTIONS=nocheck \
+          dpkg-buildpackage -B -uc -us
+      )
+      ;;
+    *)
+      note "Compiling ${srcpkg} with DEB_BUILD_OPTIONS=nocheck"
+      (
+        cd "${srcdir}"
+        DEB_BUILD_OPTIONS=nocheck dpkg-buildpackage -B -uc -us
+      )
+      ;;
+  esac
+}
+
 for srcpkg in "${SOURCE_PACKAGES[@]}"; do
   pkg_workdir="${BUILD_ROOT}/${srcpkg}"
   rm -rf "${pkg_workdir}"
@@ -186,12 +209,7 @@ for srcpkg in "${SOURCE_PACKAGES[@]}"; do
   assert_selected_versions
 
   srcdir="$(resolve_source_dir "${pkg_workdir}" "${srcpkg}")"
-
-  note "Compiling ${srcpkg} with DEB_BUILD_OPTIONS=nocheck"
-  (
-    cd "${srcdir}"
-    DEB_BUILD_OPTIONS=nocheck dpkg-buildpackage -B -uc -us
-  )
+  build_source_package "${srcpkg}"
 
   assert_selected_versions
 done
