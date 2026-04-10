@@ -35,7 +35,7 @@ esac
 
 [ -f "${DEPENDENTS_FILE}" ] || fail "Missing dependents manifest: ${DEPENDENTS_FILE}"
 
-expected_sources=$'emacs\njanus\njose\njshon\nlibteam\nmtr\nsuricata\ntang\nulogd2\nwayvnc\nwebdis'
+expected_sources=$'emacs\njanus\njose\njshon\nlibteam\nmtr\nnghttp2\nsuricata\ntang\nulogd2\nwayvnc\nwebdis'
 actual_sources="$(jq -r '.dependents[].source_package' "${DEPENDENTS_FILE}" | sort -u)"
 [ -n "${actual_sources}" ] || fail "No source packages found in ${DEPENDENTS_FILE}"
 [ "${actual_sources}" = "${expected_sources}" ] || fail \

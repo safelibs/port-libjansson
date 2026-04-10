@@ -4,8 +4,8 @@
     "upstream_name": "Jansson",
     "upstream_repository": "https://github.com/akheron/jansson"
   },
-  "generated_at_utc": "2026-04-07T08:48:26Z",
-  "as_of_date": "2026-04-07",
+  "generated_at_utc": "2026-04-10T01:58:14Z",
+  "as_of_date": "2026-04-10",
   "distribution": {
     "name": "Ubuntu",
     "release": "24.04",
@@ -93,6 +93,21 @@
         "NEWS:93 says report JSON was reworked with libjansson",
         "ui/report.c:296 implements json_close(struct mtr_ctl *ctl)",
         "ui/report.c:384 writes the final report with json_dumpf"
+      ]
+    },
+    {
+      "software": "nghttp2",
+      "binary_package": "nghttp2-client",
+      "source_package": "nghttp2",
+      "category": "HTTP/2 client",
+      "dependency_kind": "runtime",
+      "dependency_package": "libjansson4",
+      "runtime_functionality": "nghttp can emit HAR JSON for captured HTTP/2 transactions, and the nghttp2 source tree also uses Jansson for HPACK header-compression JSON tooling.",
+      "source_evidence": [
+        "src/nghttp.cc:1492 implements HttpClient::output_har(FILE *outfile)",
+        "src/nghttp.cc:1659 writes HAR output with json_dumpf",
+        "src/deflatehd.cc:79 implements output_to_json for HPACK deflate results",
+        "src/deflatehd.cc:198 parses JSON header cases with json_loadf"
       ]
     },
     {

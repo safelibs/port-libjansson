@@ -66,7 +66,7 @@ Mode semantics:
 - `JANSSON_TEST_MODE=runtime` only runs the downstream binary smoke tests.
 - `JANSSON_TEST_MODE=all` runs the package-based dependent rebuild harness first and then the runtime smoke tests.
 
-The dependent rebuild harness is driven directly from [`dependents.json`](/home/yans/safelibs/port-libjansson/dependents.json). In safe mode it installs and pins the locally built `libjansson4` and `libjansson-dev` packages before rebuilding every unique source package in the manifest:
+The downstream matrix is driven directly from [`dependents.json`](/home/yans/safelibs/port-libjansson/dependents.json), which remains the one source of truth for the counted application inventory. The current Ubuntu 24.04 manifest contains these 12 unique `source_package` entries:
 
 - `emacs`
 - `janus`
@@ -74,11 +74,24 @@ The dependent rebuild harness is driven directly from [`dependents.json`](/home/
 - `jshon`
 - `libteam`
 - `mtr`
+- `nghttp2`
 - `suricata`
 - `tang`
 - `ulogd2`
 - `wayvnc`
 - `webdis`
+
+[`safe/scripts/check-dependent-builds.sh`](/home/yans/safelibs/port-libjansson/safe/scripts/check-dependent-builds.sh) consumes that manifest directly. In safe mode it installs and pins the locally built `libjansson4` and `libjansson-dev` packages before rebuilding every unique source package in the manifest.
+
+Build the reusable prepared-image scaffold with:
+
+```sh
+safe/scripts/build-dependent-image.sh --implementation safe --tag libjansson-safe-matrix:local
+```
+
+That image workflow installs the same Debian packages the rest of the verification path uses. It resolves the 12 primary application binaries from [`dependents.json`](/home/yans/safelibs/port-libjansson/dependents.json), installs the build/runtime prerequisite union already encoded in [`test-original.sh`](/home/yans/safelibs/port-libjansson/test-original.sh), and adds only the extra helper binaries required to exercise manifest entries, currently `nghttp2-server`.
+
+When `--implementation safe` is selected, [`safe/scripts/build-dependent-image.sh`](/home/yans/safelibs/port-libjansson/safe/scripts/build-dependent-image.sh) reuses any preexisting `safe/dist/libjansson4_*.deb` and `safe/dist/libjansson-dev_*.deb` artifacts in place and only falls back to [`safe/scripts/build-deb.sh`](/home/yans/safelibs/port-libjansson/safe/scripts/build-deb.sh) when those Debian packages are missing.
 
 The bulk API and data-suite runners always consume the checked-in mirror under `safe/tests/`; refresh that mirror only through `safe/scripts/sync-upstream-tests.sh --sync`.
 

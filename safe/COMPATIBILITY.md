@@ -52,17 +52,26 @@ This document is the authoritative compatibility contract for the safe port as a
   - `webdis`
 - The ulogd JSON plugin check resolves the installed plugin path from package contents instead of hard-coding an architecture path.
 
+## Prepared Image Compatibility
+
+- [`safe/docker/dependent-matrix.Dockerfile`](/home/yans/safelibs/port-libjansson/safe/docker/dependent-matrix.Dockerfile) is the reusable Ubuntu 24.04 scaffold for the downstream dependent matrix.
+- [`safe/scripts/build-dependent-image.sh`](/home/yans/safelibs/port-libjansson/safe/scripts/build-dependent-image.sh) resolves the primary application binaries directly from [`dependents.json`](/home/yans/safelibs/port-libjansson/dependents.json), so the checked-in manifest remains the authoritative source of truth for the counted matrix.
+- The prepared image installs the union of build/runtime prerequisites currently encoded in [`test-original.sh`](/home/yans/safelibs/port-libjansson/test-original.sh), the 12 primary manifest binaries, and only the extra helper binaries required to exercise a manifest entry. Today that extra helper is `nghttp2-server` for the `nghttp2-client` entry.
+- In safe mode the image builder reuses any preexisting `safe/dist/libjansson4_*.deb` and `safe/dist/libjansson-dev_*.deb` artifacts, and only invokes [`safe/scripts/build-deb.sh`](/home/yans/safelibs/port-libjansson/safe/scripts/build-deb.sh) when those Debian packages are missing.
+- The prepared-image path always installs `libjansson4` and `libjansson-dev` through Debian packages, so the image consumes the same package artifacts that the rest of the verification workflow exercises.
+
 ## Downstream Build Compatibility
 
 - [`safe/scripts/check-dependent-builds.sh`](/home/yans/safelibs/port-libjansson/safe/scripts/check-dependent-builds.sh) is the authoritative compile-compatibility harness for every unique `source_package` in [`dependents.json`](/home/yans/safelibs/port-libjansson/dependents.json).
 - `JANSSON_IMPLEMENTATION=safe JANSSON_TEST_MODE=build ./test-original.sh` runs that harness inside a clean Ubuntu 24.04 container after installing the locally built replacement packages.
-- The harness rebuilds exactly these Ubuntu 24.04 source packages:
+- The 12-source-package matrix is defined by [`dependents.json`](/home/yans/safelibs/port-libjansson/dependents.json). The current Ubuntu 24.04 manifest rebuilds exactly:
   - `emacs`
   - `janus`
   - `jose`
   - `jshon`
   - `libteam`
   - `mtr`
+  - `nghttp2`
   - `suricata`
   - `tang`
   - `ulogd2`
