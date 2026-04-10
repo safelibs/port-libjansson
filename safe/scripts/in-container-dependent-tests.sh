@@ -8,6 +8,11 @@ JANSSON_IMPLEMENTATION="${JANSSON_IMPLEMENTATION:-original}"
 JANSSON_TEST_MODE="${JANSSON_TEST_MODE:-runtime}"
 HOST_UID="${HOST_UID:-}"
 HOST_GID="${HOST_GID:-}"
+JANSSON_RUNTIME_APPLICATIONS="${JANSSON_RUNTIME_APPLICATIONS:-}"
+JANSSON_RUNTIME_CHECKS="${JANSSON_RUNTIME_CHECKS:-}"
+JANSSON_BUILD_SOURCE_PACKAGES="${JANSSON_BUILD_SOURCE_PACKAGES:-}"
+DEPENDENT_MATRIX_LOG_ROOT_BASE="${DEPENDENT_MATRIX_LOG_ROOT_BASE:-}"
+DEPENDENT_MATRIX_ISSUE_FILE="${DEPENDENT_MATRIX_ISSUE_FILE:-}"
 
 case "${JANSSON_IMPLEMENTATION}" in
   original|safe)
@@ -46,12 +51,12 @@ case "${JANSSON_TEST_MODE}" in
 esac
 
 MATRIX_RUN_STARTED_AT="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-LOG_ROOT_BASE="${ROOT_DIR}/safe/.build/dependent-matrix/${JANSSON_IMPLEMENTATION}"
+LOG_ROOT_BASE="${DEPENDENT_MATRIX_LOG_ROOT_BASE:-${ROOT_DIR}/safe/.build/dependent-matrix/${JANSSON_IMPLEMENTATION}}"
 BUILD_LOG_ROOT="${LOG_ROOT_BASE}/build"
 RUNTIME_LOG_ROOT="${LOG_ROOT_BASE}/runtime"
 BUILD_ISSUES_JSONL="${BUILD_LOG_ROOT}/issues.jsonl"
 RUNTIME_ISSUES_JSONL="${RUNTIME_LOG_ROOT}/issues.jsonl"
-ISSUE_FILE="${ROOT_DIR}/safe/tests/regressions/discovered-issues.md"
+ISSUE_FILE="${DEPENDENT_MATRIX_ISSUE_FILE:-${ROOT_DIR}/safe/tests/regressions/discovered-issues.md}"
 
 MULTIARCH=
 SELECTED_JANSSON=
@@ -63,6 +68,7 @@ ULOGD_INPUT_PLUGIN=
 ULOGD_BASE_PLUGIN=
 ULOGD_OUTPUT_PLUGIN=
 APP_LOG_DIR=
+RUNTIME_SELECTED_COUNT=0
 
 note() {
   printf '\n==> %s\n' "$1"
@@ -98,6 +104,41 @@ relative_path() {
       printf '%s\n' "${path}"
       ;;
   esac
+}
+
+csv_contains() {
+  local csv="$1"
+  local needle="$2"
+  local item
+
+  IFS=',' read -r -a items <<<"${csv}"
+  for item in "${items[@]}"; do
+    [ "${item}" = "${needle}" ] && return 0
+  done
+
+  return 1
+}
+
+should_run_runtime_check() {
+  local application="$1"
+  local check="$2"
+
+  if [ -n "${JANSSON_RUNTIME_APPLICATIONS}" ] && \
+    ! csv_contains "${JANSSON_RUNTIME_APPLICATIONS}" "${application}"; then
+    return 1
+  fi
+
+  if [ -z "${JANSSON_RUNTIME_CHECKS}" ]; then
+    return 0
+  fi
+
+  if csv_contains "${JANSSON_RUNTIME_CHECKS}" "${check}" || \
+    csv_contains "${JANSSON_RUNTIME_CHECKS}" "${application}:${check}" || \
+    csv_contains "${JANSSON_RUNTIME_CHECKS}" "${application}/${check}"; then
+    return 0
+  fi
+
+  return 1
 }
 
 random_port() {
@@ -390,6 +431,7 @@ run_build_harness() {
   DEPENDENT_MATRIX_LOG_ROOT="${BUILD_LOG_ROOT}" \
   DEPENDENT_MATRIX_ISSUES_JSONL="${BUILD_ISSUES_JSONL}" \
   DEPENDENT_MATRIX_RUN_STARTED_AT="${MATRIX_RUN_STARTED_AT}" \
+  DEPENDENT_MATRIX_SOURCE_PACKAGES="${JANSSON_BUILD_SOURCE_PACKAGES}" \
   JANSSON_IMPLEMENTATION="${JANSSON_IMPLEMENTATION}" \
   "${ROOT_DIR}/safe/scripts/check-dependent-builds.sh"
 }
@@ -432,6 +474,30 @@ run_runtime_check() {
   record_runtime_issue runtime "${application}" "${check}" "${title}" "${command}" \
     "${expected_behavior}" "${observed_behavior}" "${suspected_subsystem}" "${log_path}"
   return 1
+}
+
+run_selected_runtime_check() {
+  local application="$1"
+  local check="$2"
+  local title="$3"
+  local command="$4"
+  local expected_behavior="$5"
+  local suspected_subsystem="$6"
+  local function_name="$7"
+
+  if ! should_run_runtime_check "${application}" "${check}"; then
+    return 0
+  fi
+
+  RUNTIME_SELECTED_COUNT=$((RUNTIME_SELECTED_COUNT + 1))
+  run_runtime_check \
+    "${application}" \
+    "${check}" \
+    "${title}" \
+    "${command}" \
+    "${expected_behavior}" \
+    "${suspected_subsystem}" \
+    "${function_name}"
 }
 
 check_emacs_resolution() {
@@ -604,12 +670,17 @@ test_nghttp2() (
   local port
   local docroot="${APP_LOG_DIR}/htdocs"
   local har_path="${APP_LOG_DIR}/capture.har"
+  local fixture="${ROOT_DIR}/safe/tests/regressions/fixtures/nghttp2/index.json"
 
   trap 'kill "${pid}" 2>/dev/null || true; wait "${pid}" 2>/dev/null || true' EXIT
 
   rm -rf "${docroot}"
   mkdir -p "${docroot}"
-  printf '{"ok":true}\n' >"${docroot}/index.json"
+  if [ -f "${fixture}" ]; then
+    cp "${fixture}" "${docroot}/index.json"
+  else
+    printf '{"ok":true}\n' >"${docroot}/index.json"
+  fi
 
   port="$(random_port)"
   nghttpd --no-tls -d "${docroot}" -a 127.0.0.1 "${port}" \
@@ -1021,17 +1092,22 @@ run_runtime_smoke_tests() {
   reset_log_root "${RUNTIME_LOG_ROOT}"
   : >"${RUNTIME_ISSUES_JSONL}"
   resolve_ulogd_plugins
+  RUNTIME_SELECTED_COUNT=0
+
+  if [ -n "${JANSSON_RUNTIME_APPLICATIONS}" ] || [ -n "${JANSSON_RUNTIME_CHECKS}" ]; then
+    note "Restricting runtime smoke tests to applications [${JANSSON_RUNTIME_APPLICATIONS:-all}] and checks [${JANSSON_RUNTIME_CHECKS:-all}]"
+  fi
 
   note "Verifying that each exercised binary resolves libjansson from ${SELECTED_LABEL}"
 
-  if ! run_runtime_check emacs selected-libjansson-resolution \
+  if ! run_selected_runtime_check emacs selected-libjansson-resolution \
     "Emacs resolves the selected libjansson" \
     "ldd /usr/bin/emacs | awk '/libjansson\\.so\\.4/ { print \$3; exit }'" \
     "The exercised Emacs binary should resolve libjansson.so.4 from ${SELECTED_LABEL}." \
     linker check_emacs_resolution; then
     runtime_status=1
   fi
-  if ! run_runtime_check emacs json-roundtrip \
+  if ! run_selected_runtime_check emacs json-roundtrip \
     "Emacs JSON round-trip" \
     "emacs --batch --eval '(princ (json-serialize (json-parse-string \"{\\\"x\\\":1}\")))'" \
     "Emacs should parse and serialize JSON without changing the payload." \
@@ -1039,14 +1115,14 @@ run_runtime_smoke_tests() {
     runtime_status=1
   fi
 
-  if ! run_runtime_check janus selected-libjansson-resolution \
+  if ! run_selected_runtime_check janus selected-libjansson-resolution \
     "Janus resolves the selected libjansson" \
     "ldd /usr/bin/janus | awk '/libjansson\\.so\\.4/ { print \$3; exit }'" \
     "The exercised Janus binary should resolve libjansson.so.4 from ${SELECTED_LABEL}." \
     linker check_janus_resolution; then
     runtime_status=1
   fi
-  if ! run_runtime_check janus http-json-api \
+  if ! run_selected_runtime_check janus http-json-api \
     "Janus HTTP JSON API" \
     "curl -fsS http://127.0.0.1:8088/janus/info && curl -fsS -H 'Content-Type: application/json' -d '{\"janus\":\"create\",\"transaction\":\"txn1\"}' http://127.0.0.1:8088/janus" \
     "Janus should serve JSON info and create-session responses that parse correctly." \
@@ -1054,14 +1130,14 @@ run_runtime_smoke_tests() {
     runtime_status=1
   fi
 
-  if ! run_runtime_check jshon selected-libjansson-resolution \
+  if ! run_selected_runtime_check jshon selected-libjansson-resolution \
     "jshon resolves the selected libjansson" \
     "ldd /usr/bin/jshon | awk '/libjansson\\.so\\.4/ { print \$3; exit }'" \
     "The exercised jshon binary should resolve libjansson.so.4 from ${SELECTED_LABEL}." \
     linker check_jshon_resolution; then
     runtime_status=1
   fi
-  if ! run_runtime_check jshon cli-parse \
+  if ! run_selected_runtime_check jshon cli-parse \
     "jshon parses array members" \
     "printf '{\"foo\":1,\"bar\":[2,3]}' | jshon -e bar -a -u" \
     "jshon should emit the expected array members from parsed JSON input." \
@@ -1069,14 +1145,14 @@ run_runtime_smoke_tests() {
     runtime_status=1
   fi
 
-  if ! run_runtime_check jose selected-libjansson-resolution \
+  if ! run_selected_runtime_check jose selected-libjansson-resolution \
     "jose resolves the selected libjansson" \
     "ldd /usr/bin/jose | awk '/libjansson\\.so\\.4/ { print \$3; exit }'" \
     "The exercised jose binary should resolve libjansson.so.4 from ${SELECTED_LABEL}." \
     linker check_jose_resolution; then
     runtime_status=1
   fi
-  if ! run_runtime_check jose jwk-generation \
+  if ! run_selected_runtime_check jose jwk-generation \
     "jose generates a JWK" \
     "jose jwk gen -i '{\"alg\":\"ES256\"}' -o jose.jwk" \
     "jose should generate a JSON JWK whose parsed fields match the requested algorithm." \
@@ -1084,14 +1160,14 @@ run_runtime_smoke_tests() {
     runtime_status=1
   fi
 
-  if ! run_runtime_check mtr selected-libjansson-resolution \
+  if ! run_selected_runtime_check mtr selected-libjansson-resolution \
     "mtr resolves the selected libjansson" \
     "ldd /usr/bin/mtr | awk '/libjansson\\.so\\.4/ { print \$3; exit }'" \
     "The exercised mtr binary should resolve libjansson.so.4 from ${SELECTED_LABEL}." \
     linker check_mtr_resolution; then
     runtime_status=1
   fi
-  if ! run_runtime_check mtr json-report \
+  if ! run_selected_runtime_check mtr json-report \
     "mtr emits a JSON report" \
     "mtr -r -j -n -c 1 127.0.0.1" \
     "mtr should emit JSON output whose report.hubs entry contains 127.0.0.1." \
@@ -1099,14 +1175,14 @@ run_runtime_smoke_tests() {
     runtime_status=1
   fi
 
-  if ! run_runtime_check nghttp2 selected-libjansson-resolution \
+  if ! run_selected_runtime_check nghttp2 selected-libjansson-resolution \
     "nghttp resolves the selected libjansson" \
     "ldd /usr/bin/nghttp | awk '/libjansson\\.so\\.4/ { print \$3; exit }'" \
     "The exercised nghttp binary should resolve libjansson.so.4 from ${SELECTED_LABEL}." \
     linker check_nghttp2_resolution; then
     runtime_status=1
   fi
-  if ! run_runtime_check nghttp2 har-json-structure \
+  if ! run_selected_runtime_check nghttp2 har-json-structure \
     "nghttp emits a HAR document with a top-level log object" \
     "nghttp -ans --har=capture.har http://127.0.0.1:<port>/index.json" \
     "nghttp should write a HAR file that parses as JSON and contains a top-level log object with entries." \
@@ -1114,14 +1190,14 @@ run_runtime_smoke_tests() {
     runtime_status=1
   fi
 
-  if ! run_runtime_check suricata selected-libjansson-resolution \
+  if ! run_selected_runtime_check suricata selected-libjansson-resolution \
     "Suricata resolves the selected libjansson" \
     "ldd /usr/bin/suricata | awk '/libjansson\\.so\\.4/ { print \$3; exit }'" \
     "The exercised Suricata binary should resolve libjansson.so.4 from ${SELECTED_LABEL}." \
     linker check_suricata_resolution; then
     runtime_status=1
   fi
-  if ! run_runtime_check suricata eve-json \
+  if ! run_selected_runtime_check suricata eve-json \
     "Suricata emits EVE JSON" \
     "suricata -r suricata-test.pcap -l suricata-out -c /etc/suricata/suricata.yaml" \
     "Suricata should emit EVE JSON events containing a flow event." \
@@ -1129,14 +1205,14 @@ run_runtime_smoke_tests() {
     runtime_status=1
   fi
 
-  if ! run_runtime_check tang selected-libjansson-resolution \
+  if ! run_selected_runtime_check tang selected-libjansson-resolution \
     "Tang resolves the selected libjansson" \
     "ldd /usr/libexec/tangd | awk '/libjansson\\.so\\.4/ { print \$3; exit }'" \
     "The exercised Tang daemon should resolve libjansson.so.4 from ${SELECTED_LABEL}." \
     linker check_tang_resolution; then
     runtime_status=1
   fi
-  if ! run_runtime_check tang advertisement-and-recovery \
+  if ! run_selected_runtime_check tang advertisement-and-recovery \
     "Tang advertises and recovers JWK material" \
     "curl -fsS http://127.0.0.1:<port>/adv && curl -fsS -X POST -H 'Content-Type: application/jwk+json' --data-binary @exc.pub.jwk http://127.0.0.1:<port>/rec/<kid>" \
     "Tang should serve a signed advertisement and return the expected recovery payload." \
@@ -1144,14 +1220,14 @@ run_runtime_smoke_tests() {
     runtime_status=1
   fi
 
-  if ! run_runtime_check libteam selected-libjansson-resolution \
+  if ! run_selected_runtime_check libteam selected-libjansson-resolution \
     "teamd and teamdctl resolve the selected libjansson" \
     "ldd /usr/bin/teamd && ldd /usr/bin/teamdctl" \
     "The exercised teamd and teamdctl binaries should resolve libjansson.so.4 from ${SELECTED_LABEL}." \
     linker check_libteam_resolution; then
     runtime_status=1
   fi
-  if ! run_runtime_check libteam teamdctl-state-dump \
+  if ! run_selected_runtime_check libteam teamdctl-state-dump \
     "teamd parses config and teamdctl parses JSON state" \
     "teamd -t team0 -n -U -c '{\"runner\":{\"name\":\"activebackup\"}}' && teamdctl -U lo state dump" \
     "teamd should parse its JSON config and teamdctl should parse the JSON state dump." \
@@ -1159,14 +1235,14 @@ run_runtime_smoke_tests() {
     runtime_status=1
   fi
 
-  if ! run_runtime_check ulogd2 selected-libjansson-resolution \
+  if ! run_selected_runtime_check ulogd2 selected-libjansson-resolution \
     "ulogd JSON plugin resolves the selected libjansson" \
     "ldd ${ULOGD_OUTPUT_PLUGIN} | awk '/libjansson\\.so\\.4/ { print \$3; exit }'" \
     "The exercised ulogd JSON plugin should resolve libjansson.so.4 from ${SELECTED_LABEL}." \
     linker check_ulogd_resolution; then
     runtime_status=1
   fi
-  if ! run_runtime_check ulogd2 json-output-plugin \
+  if ! run_selected_runtime_check ulogd2 json-output-plugin \
     "ulogd JSON plugin writes a parsed event" \
     "ulogd -v -c ulogd-test.conf" \
     "ulogd should write a JSON event whose parsed packet fields match the injected payload." \
@@ -1174,14 +1250,14 @@ run_runtime_smoke_tests() {
     runtime_status=1
   fi
 
-  if ! run_runtime_check wayvnc selected-libjansson-resolution \
+  if ! run_selected_runtime_check wayvnc selected-libjansson-resolution \
     "wayvnc and wayvncctl resolve the selected libjansson" \
     "ldd /usr/bin/wayvnc && ldd /usr/bin/wayvncctl" \
     "The exercised wayvnc and wayvncctl binaries should resolve libjansson.so.4 from ${SELECTED_LABEL}." \
     linker check_wayvnc_resolution; then
     runtime_status=1
   fi
-  if ! run_runtime_check wayvnc json-control \
+  if ! run_selected_runtime_check wayvnc json-control \
     "wayvncctl parses JSON control output" \
     "wayvncctl --json -S wayvnc-test.sock version" \
     "wayvncctl should parse the JSON response from the control socket." \
@@ -1189,19 +1265,23 @@ run_runtime_smoke_tests() {
     runtime_status=1
   fi
 
-  if ! run_runtime_check webdis selected-libjansson-resolution \
+  if ! run_selected_runtime_check webdis selected-libjansson-resolution \
     "webdis resolves the selected libjansson" \
     "ldd /usr/bin/webdis | awk '/libjansson\\.so\\.4/ { print \$3; exit }'" \
     "The exercised webdis binary should resolve libjansson.so.4 from ${SELECTED_LABEL}." \
     linker check_webdis_resolution; then
     runtime_status=1
   fi
-  if ! run_runtime_check webdis json-http-response \
+  if ! run_selected_runtime_check webdis json-http-response \
     "webdis serves JSON HTTP responses" \
     "curl -fsS http://127.0.0.1:<port>/SET/testkey/testvalue.json && curl -fsS http://127.0.0.1:<port>/GET/testkey.json" \
     "webdis should expose Redis writes and reads through JSON HTTP responses." \
     dump test_webdis; then
     runtime_status=1
+  fi
+
+  if [ "${RUNTIME_SELECTED_COUNT}" -eq 0 ]; then
+    fail "Runtime filters selected no checks to execute"
   fi
 
   if [ "${runtime_status}" -eq 0 ]; then

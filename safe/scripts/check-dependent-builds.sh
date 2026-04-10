@@ -10,6 +10,7 @@ BUILD_ROOT="$(mktemp -d /tmp/libjansson-dependent-builds.XXXXXX)"
 LOG_ROOT="${DEPENDENT_MATRIX_LOG_ROOT:-${ROOT_DIR}/safe/.build/dependent-matrix/${JANSSON_IMPLEMENTATION}/build}"
 ISSUES_JSONL="${DEPENDENT_MATRIX_ISSUES_JSONL:-${LOG_ROOT}/issues.jsonl}"
 RUN_STARTED_AT="${DEPENDENT_MATRIX_RUN_STARTED_AT:-$(date -u +%Y-%m-%dT%H:%M:%SZ)}"
+SOURCE_PACKAGE_FILTER="${DEPENDENT_MATRIX_SOURCE_PACKAGES:-}"
 
 note() {
   printf '\n==> %s\n' "$1"
@@ -18,6 +19,19 @@ note() {
 fail() {
   printf 'ERROR: %s\n' "$*" >&2
   exit 1
+}
+
+csv_contains() {
+  local csv="$1"
+  local needle="$2"
+  local item
+
+  IFS=',' read -r -a items <<<"${csv}"
+  for item in "${items[@]}"; do
+    [ "${item}" = "${needle}" ] && return 0
+  done
+
+  return 1
 }
 
 cleanup() {
@@ -49,6 +63,19 @@ actual:
 ${actual_sources}"
 
 mapfile -t SOURCE_PACKAGES < <(printf '%s\n' "${actual_sources}")
+
+if [ -n "${SOURCE_PACKAGE_FILTER}" ]; then
+  FILTERED_SOURCE_PACKAGES=()
+  for srcpkg in "${SOURCE_PACKAGES[@]}"; do
+    if csv_contains "${SOURCE_PACKAGE_FILTER}" "${srcpkg}"; then
+      FILTERED_SOURCE_PACKAGES+=("${srcpkg}")
+    fi
+  done
+  SOURCE_PACKAGES=("${FILTERED_SOURCE_PACKAGES[@]}")
+  [ "${#SOURCE_PACKAGES[@]}" -gt 0 ] || fail \
+    "DEPENDENT_MATRIX_SOURCE_PACKAGES did not match any known source package: ${SOURCE_PACKAGE_FILTER}"
+  note "Restricting dependent source-package rebuilds to: ${SOURCE_PACKAGES[*]}"
+fi
 
 SAFE_RUNTIME_VERSION=
 SAFE_DEV_VERSION=
