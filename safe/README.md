@@ -29,7 +29,7 @@ The build-tree compatibility and contract checks that feed the final gate are:
 safe/scripts/sync-upstream-tests.sh --check
 safe/scripts/check-allocator-hooks.sh
 safe/scripts/check-container-primitives.sh
-safe/scripts/check-exports.sh
+safe/scripts/check-exports.sh --check-versions
 safe/scripts/build-upstream-api-tests.sh --all
 safe/scripts/run-upstream-api-tests.sh --all
 safe/scripts/run-data-suites.sh valid invalid invalid-unicode encoding-flags
@@ -45,12 +45,16 @@ mkdir -p "$install_root"
 dpkg-deb -x safe/dist/libjansson4_*.deb "$install_root"
 dpkg-deb -x safe/dist/libjansson-dev_*.deb "$install_root"
 
-safe/scripts/check-exports.sh --installed-root "$install_root"
-safe/scripts/build-upstream-api-tests.sh --installed-dev --installed-root "$install_root" --all
-safe/scripts/run-upstream-api-tests.sh --installed-dev --installed-root "$install_root" --all
-safe/scripts/run-data-suites.sh --installed-dev --installed-root "$install_root" \
+clean_env() {
+  env -u PKG_CONFIG_PATH -u LD_LIBRARY_PATH -u LIBRARY_PATH -u CPATH -u C_INCLUDE_PATH "$@"
+}
+
+clean_env safe/scripts/check-exports.sh --installed-root "$install_root" --check-versions
+clean_env safe/scripts/build-upstream-api-tests.sh --installed-dev --installed-root "$install_root" --all
+clean_env safe/scripts/run-upstream-api-tests.sh --installed-dev --installed-root "$install_root" --all
+clean_env safe/scripts/run-data-suites.sh --installed-dev --installed-root "$install_root" \
     valid invalid invalid-unicode encoding-flags
-safe/scripts/check-link-compat.sh --installed-root "$install_root"
+clean_env safe/scripts/check-link-compat.sh --installed-root "$install_root"
 ```
 
 For direct `pkg-config` and link validation against that extracted root, keep all paths expressed via `dpkg-architecture -qDEB_HOST_MULTIARCH`:
@@ -83,6 +87,7 @@ The downstream matrix is driven directly from `dependents.json`. The authoritati
 
 The authoritative prepared-image workflow is:
 
+```sh
 image_tag="libjansson-safe-matrix:local"
 safe/scripts/build-dependent-image.sh --implementation safe --tag "$image_tag"
 safe/scripts/run-dependent-image-tests.sh --image "$image_tag" --implementation safe --mode build
