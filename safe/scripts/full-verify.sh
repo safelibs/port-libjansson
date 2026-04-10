@@ -38,6 +38,7 @@ multiarch="$(dpkg-architecture -qDEB_HOST_MULTIARCH)"; test -f "/usr/lib/$multia
 env -u PKG_CONFIG_PATH -u LD_LIBRARY_PATH -u LIBRARY_PATH -u CPATH -u C_INCLUDE_PATH sh -c 'multiarch="$(dpkg-architecture -qDEB_HOST_MULTIARCH)"; cc $(pkg-config --cflags jansson) original/jansson-2.14/examples/simple_parse.c $(pkg-config --libs jansson) -o /tmp/jansson-simple-parse && ldd /tmp/jansson-simple-parse | grep "/usr/lib/$multiarch/libjansson.so.4"'
 multiarch="$(dpkg-architecture -qDEB_HOST_MULTIARCH)"; env -u PKG_CONFIG_PATH -u LD_LIBRARY_PATH -u LIBRARY_PATH -u CPATH -u C_INCLUDE_PATH cc -I/usr/include original/jansson-2.14/examples/simple_parse.c "/usr/lib/$multiarch/libjansson.a" -o /tmp/jansson-simple-parse-static
 env -u PKG_CONFIG_PATH -u LD_LIBRARY_PATH -u LIBRARY_PATH -u CPATH -u C_INCLUDE_PATH safe/scripts/check-link-compat.sh --installed-root /
-JANSSON_IMPLEMENTATION=safe JANSSON_TEST_MODE=build ./test-original.sh
-JANSSON_IMPLEMENTATION=safe JANSSON_TEST_MODE=runtime ./test-original.sh
+image_tag="libjansson-safe-matrix:full-verify"; safe/scripts/build-dependent-image.sh --implementation safe --tag "$image_tag"
+safe/scripts/run-dependent-image-tests.sh --image "$image_tag" --implementation safe --mode build
+safe/scripts/run-dependent-image-tests.sh --image "$image_tag" --implementation safe --mode runtime
 rg -n '\bunsafe\b|extern "C"|no_mangle' safe/src safe/csrc

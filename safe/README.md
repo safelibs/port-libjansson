@@ -59,6 +59,8 @@ JANSSON_IMPLEMENTATION=safe JANSSON_TEST_MODE=build ./test-original.sh
 
 Mode semantics:
 
+- [`safe/scripts/run-dependent-image-tests.sh`](/home/yans/safelibs/port-libjansson/safe/scripts/run-dependent-image-tests.sh) is the authoritative host-side container runner. [`test-original.sh`](/home/yans/safelibs/port-libjansson/test-original.sh) and [`test-safe.sh`](/home/yans/safelibs/port-libjansson/test-safe.sh) remain compatibility shims that delegate to it instead of carrying their own smoke-test copy.
+- [`safe/scripts/in-container-dependent-tests.sh`](/home/yans/safelibs/port-libjansson/safe/scripts/in-container-dependent-tests.sh) is the single authoritative in-container harness for both the legacy wrapper path and the prepared-image path.
 - `JANSSON_IMPLEMENTATION=original` keeps the original runtime baseline as the default. Runtime mode builds upstream `original/jansson-2.14` into `/usr/local` and exercises the existing smoke tests against that overlay.
 - In `JANSSON_TEST_MODE=build`, `JANSSON_IMPLEMENTATION=original` uses Ubuntu's archive `libjansson4` and `libjansson-dev` packages as the package-manager compile baseline.
 - `JANSSON_IMPLEMENTATION=safe` consumes the prebuilt `safe/dist/libjansson4_*.deb` and `safe/dist/libjansson-dev_*.deb` artifacts, installs them with `dpkg -i`, and exercises the same downstream smoke tests as an actual system-package replacement.
@@ -89,9 +91,19 @@ Build the reusable prepared-image scaffold with:
 safe/scripts/build-dependent-image.sh --implementation safe --tag libjansson-safe-matrix:local
 ```
 
-That image workflow installs the same Debian packages the rest of the verification path uses. It resolves the 12 primary application binaries from [`dependents.json`](/home/yans/safelibs/port-libjansson/dependents.json), installs the build/runtime prerequisite union already encoded in [`test-original.sh`](/home/yans/safelibs/port-libjansson/test-original.sh), and adds only the extra helper binaries required to exercise manifest entries, currently `nghttp2-server`.
+Run the prepared-image matrix with:
+
+```sh
+image_tag="libjansson-safe-matrix:local"
+safe/scripts/run-dependent-image-tests.sh --image "$image_tag" --implementation safe --mode build
+safe/scripts/run-dependent-image-tests.sh --image "$image_tag" --implementation safe --mode runtime
+```
+
+That image workflow installs the same Debian packages the rest of the verification path uses. It resolves the 12 primary application binaries from [`dependents.json`](/home/yans/safelibs/port-libjansson/dependents.json), installs the build/runtime prerequisite union consumed by [`safe/scripts/in-container-dependent-tests.sh`](/home/yans/safelibs/port-libjansson/safe/scripts/in-container-dependent-tests.sh), and adds only the extra helper binaries required to exercise manifest entries, currently `nghttp2-server`.
 
 When `--implementation safe` is selected, [`safe/scripts/build-dependent-image.sh`](/home/yans/safelibs/port-libjansson/safe/scripts/build-dependent-image.sh) reuses any preexisting `safe/dist/libjansson4_*.deb` and `safe/dist/libjansson-dev_*.deb` artifacts in place and only falls back to [`safe/scripts/build-deb.sh`](/home/yans/safelibs/port-libjansson/safe/scripts/build-deb.sh) when those Debian packages are missing.
+
+Every build/runtime matrix run writes per-application logs under [`safe/.build/dependent-matrix/`](/home/yans/safelibs/port-libjansson/safe/.build/dependent-matrix) and updates the checked-in issue inventory at [`safe/tests/regressions/discovered-issues.md`](/home/yans/safelibs/port-libjansson/safe/tests/regressions/discovered-issues.md). Clean runs are recorded explicitly; failing runs preserve stable `APP-*` issue IDs in place.
 
 The bulk API and data-suite runners always consume the checked-in mirror under `safe/tests/`; refresh that mirror only through `safe/scripts/sync-upstream-tests.sh --sync`.
 

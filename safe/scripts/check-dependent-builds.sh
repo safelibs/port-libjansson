@@ -7,6 +7,9 @@ DIST_DIR="${ROOT_DIR}/safe/dist"
 JANSSON_IMPLEMENTATION="${JANSSON_IMPLEMENTATION:-safe}"
 APT_PIN_FILE="/etc/apt/preferences.d/libjansson-safe.pref"
 BUILD_ROOT="$(mktemp -d /tmp/libjansson-dependent-builds.XXXXXX)"
+LOG_ROOT="${DEPENDENT_MATRIX_LOG_ROOT:-${ROOT_DIR}/safe/.build/dependent-matrix/${JANSSON_IMPLEMENTATION}/build}"
+ISSUES_JSONL="${DEPENDENT_MATRIX_ISSUES_JSONL:-${LOG_ROOT}/issues.jsonl}"
+RUN_STARTED_AT="${DEPENDENT_MATRIX_RUN_STARTED_AT:-$(date -u +%Y-%m-%dT%H:%M:%SZ)}"
 
 note() {
   printf '\n==> %s\n' "$1"
@@ -49,6 +52,107 @@ mapfile -t SOURCE_PACKAGES < <(printf '%s\n' "${actual_sources}")
 
 SAFE_RUNTIME_VERSION=
 SAFE_DEV_VERSION=
+FAILURE_COUNT=0
+
+mkdir -p "${LOG_ROOT}" "$(dirname "${ISSUES_JSONL}")"
+rm -rf "${LOG_ROOT:?}/"*
+: >"${ISSUES_JSONL}"
+
+relative_path() {
+  local path="$1"
+
+  case "${path}" in
+    "${ROOT_DIR}/"*)
+      printf '%s\n' "${path#${ROOT_DIR}/}"
+      ;;
+    *)
+      printf '%s\n' "${path}"
+      ;;
+  esac
+}
+
+collapse_log_excerpt() {
+  local stderr_log="$1"
+  local stdout_log="$2"
+
+  python3 - "${stderr_log}" "${stdout_log}" <<'PY'
+from pathlib import Path
+import sys
+
+chunks = []
+
+for label, path_str in (("stderr", sys.argv[1]), ("stdout", sys.argv[2])):
+    path = Path(path_str)
+    if not path.exists():
+        continue
+    lines = [line.strip() for line in path.read_text(encoding="utf-8", errors="replace").splitlines() if line.strip()]
+    if not lines:
+        continue
+    chunks.append(f"{label}: {' | '.join(lines[-8:])}")
+
+summary = " || ".join(chunks) if chunks else "See referenced logs for details."
+print(summary[:1000])
+PY
+}
+
+append_issue_jsonl() {
+  local phase="$1"
+  local application="$2"
+  local check="$3"
+  local title="$4"
+  local command="$5"
+  local expected_behavior="$6"
+  local observed_behavior="$7"
+  local suspected_subsystem="$8"
+  local log_path="$9"
+
+  python3 - "${ISSUES_JSONL}" "${phase}" "${application}" "${check}" "${title}" \
+    "${command}" "${expected_behavior}" "${observed_behavior}" "${suspected_subsystem}" \
+    "${log_path}" "${RUN_STARTED_AT}" <<'PY'
+from pathlib import Path
+import json
+import sys
+
+path = Path(sys.argv[1])
+path.parent.mkdir(parents=True, exist_ok=True)
+
+record = {
+    "phase": sys.argv[2],
+    "application": sys.argv[3],
+    "check": sys.argv[4],
+    "title": sys.argv[5],
+    "command": sys.argv[6],
+    "expected_behavior": sys.argv[7],
+    "observed_behavior": sys.argv[8],
+    "suspected_subsystem": sys.argv[9],
+    "log_path": sys.argv[10],
+    "recorded_at_utc": sys.argv[11],
+}
+
+with path.open("a", encoding="utf-8") as handle:
+    json.dump(record, handle, sort_keys=True)
+    handle.write("\n")
+PY
+}
+
+run_logged_stage() {
+  local log_dir="$1"
+  local stage="$2"
+  local command="$3"
+  local stdout_log="${log_dir}/${stage}.stdout.log"
+  local stderr_log="${log_dir}/${stage}.stderr.log"
+  local status_file="${log_dir}/${stage}.status"
+  local command_file="${log_dir}/${stage}.command.txt"
+  local status
+
+  printf '%s\n' "${command}" >"${command_file}"
+  set +e
+  bash -lc "${command}" >"${stdout_log}" 2>"${stderr_log}"
+  status=$?
+  set -e
+  printf '%s\n' "${status}" >"${status_file}"
+  return "${status}"
+}
 
 refresh_apt_metadata() {
   note "Refreshing apt metadata"
@@ -162,56 +266,102 @@ resolve_source_dir() {
   printf '%s\n' "${extracted_dir}"
 }
 
+build_command_for() {
+  local srcdir="$1"
+  local srcpkg="$2"
+  local command
+
+  case "${srcpkg}" in
+    emacs)
+      printf -v command 'cd %q && EMACS_INHIBIT_NATIVE_COMPILATION=1 DEB_BUILD_OPTIONS=nocheck dpkg-buildpackage -B -uc -us' "${srcdir}"
+      ;;
+    *)
+      printf -v command 'cd %q && DEB_BUILD_OPTIONS=nocheck dpkg-buildpackage -B -uc -us' "${srcdir}"
+      ;;
+  esac
+
+  printf '%s\n' "${command}"
+}
+
+record_stage_failure() {
+  local srcpkg="$1"
+  local stage="$2"
+  local title="$3"
+  local command="$4"
+  local expected_behavior="$5"
+  local log_dir="$6"
+  local observed_behavior
+  local log_path
+
+  observed_behavior="$(collapse_log_excerpt "${log_dir}/${stage}.stderr.log" "${log_dir}/${stage}.stdout.log")"
+  log_path="$(relative_path "${log_dir}/${stage}.stderr.log")"
+  append_issue_jsonl build "${srcpkg}" "${stage}" "${title}" "${command}" \
+    "${expected_behavior}" "${observed_behavior}" packaging "${log_path}"
+}
+
 refresh_apt_metadata
 enable_source_repositories
 install_selected_packages
 
 note "Building dependent source packages"
 
-build_source_package() {
-  local srcpkg="$1"
-
-  case "${srcpkg}" in
-    emacs)
-      note "Compiling ${srcpkg} with DEB_BUILD_OPTIONS=nocheck and EMACS_INHIBIT_NATIVE_COMPILATION=1"
-      (
-        cd "${srcdir}"
-        EMACS_INHIBIT_NATIVE_COMPILATION=1 \
-          DEB_BUILD_OPTIONS=nocheck \
-          dpkg-buildpackage -B -uc -us
-      )
-      ;;
-    *)
-      note "Compiling ${srcpkg} with DEB_BUILD_OPTIONS=nocheck"
-      (
-        cd "${srcdir}"
-        DEB_BUILD_OPTIONS=nocheck dpkg-buildpackage -B -uc -us
-      )
-      ;;
-  esac
-}
-
 for srcpkg in "${SOURCE_PACKAGES[@]}"; do
   pkg_workdir="${BUILD_ROOT}/${srcpkg}"
-  rm -rf "${pkg_workdir}"
-  mkdir -p "${pkg_workdir}"
+  pkg_log_dir="${LOG_ROOT}/${srcpkg}"
+  srcdir=
+  fetch_cmd=
+  build_dep_cmd=
+  build_cmd=
 
+  rm -rf "${pkg_workdir}" "${pkg_log_dir}"
+  mkdir -p "${pkg_workdir}" "${pkg_log_dir}"
+
+  printf -v fetch_cmd 'cd %q && apt-get source %q' "${pkg_workdir}" "${srcpkg}"
   note "Fetching source package ${srcpkg}"
-  (
-    cd "${pkg_workdir}"
-    apt-get source "${srcpkg}"
-  )
+  if ! run_logged_stage "${pkg_log_dir}" source-fetch "${fetch_cmd}"; then
+    record_stage_failure "${srcpkg}" source-fetch \
+      "Fetch Ubuntu source package ${srcpkg}" \
+      "${fetch_cmd}" \
+      "apt-get source ${srcpkg} should succeed so the dependent matrix can rebuild the package." \
+      "${pkg_log_dir}"
+    FAILURE_COUNT=$((FAILURE_COUNT + 1))
+    continue
+  fi
 
   assert_selected_versions
 
+  build_dep_cmd="apt-get build-dep -y ${srcpkg}"
   note "Installing build-dependencies for ${srcpkg}"
-  apt-get build-dep -y "${srcpkg}"
-  assert_selected_versions
+  if ! run_logged_stage "${pkg_log_dir}" build-dependencies "${build_dep_cmd}"; then
+    record_stage_failure "${srcpkg}" build-dependencies \
+      "Install build-dependencies for ${srcpkg}" \
+      "${build_dep_cmd}" \
+      "apt-get build-dep -y ${srcpkg} should succeed without replacing the selected libjansson packages." \
+      "${pkg_log_dir}"
+    FAILURE_COUNT=$((FAILURE_COUNT + 1))
+    continue
+  fi
 
+  assert_selected_versions
   srcdir="$(resolve_source_dir "${pkg_workdir}" "${srcpkg}")"
-  build_source_package "${srcpkg}"
+  build_cmd="$(build_command_for "${srcdir}" "${srcpkg}")"
+
+  note "Compiling ${srcpkg}"
+  if ! run_logged_stage "${pkg_log_dir}" source-build "${build_cmd}"; then
+    record_stage_failure "${srcpkg}" source-build \
+      "Rebuild source package ${srcpkg}" \
+      "${build_cmd}" \
+      "${srcpkg} should rebuild successfully against ${JANSSON_IMPLEMENTATION} libjansson." \
+      "${pkg_log_dir}"
+    FAILURE_COUNT=$((FAILURE_COUNT + 1))
+    continue
+  fi
 
   assert_selected_versions
 done
+
+if [ "${FAILURE_COUNT}" -ne 0 ]; then
+  fail "Encountered ${FAILURE_COUNT} dependent source-package build failure(s)"
+fi
 
 note "Successfully rebuilt ${#SOURCE_PACKAGES[@]} dependent source packages"

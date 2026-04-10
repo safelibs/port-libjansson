@@ -35,7 +35,8 @@ This document is the authoritative compatibility contract for the safe port as a
 - Installed-package runtime compatibility is verified after `dpkg -i` by rerunning the same mirrored corpus against the installed package under `/usr`, again with build-tree search paths scrubbed:
   - `env -u ... safe/scripts/run-upstream-api-tests.sh --installed-dev --all`
   - `env -u ... safe/scripts/run-data-suites.sh --installed-dev valid invalid invalid-unicode encoding-flags`
-- [`test-original.sh`](/home/yans/safelibs/port-libjansson/test-original.sh) is the authoritative downstream runtime/build entrypoint and accepts:
+- [`safe/scripts/in-container-dependent-tests.sh`](/home/yans/safelibs/port-libjansson/safe/scripts/in-container-dependent-tests.sh) is the authoritative in-container downstream runtime/build harness.
+- [`safe/scripts/run-dependent-image-tests.sh`](/home/yans/safelibs/port-libjansson/safe/scripts/run-dependent-image-tests.sh) is the authoritative host-side container runner. [`test-original.sh`](/home/yans/safelibs/port-libjansson/test-original.sh) and [`test-safe.sh`](/home/yans/safelibs/port-libjansson/test-safe.sh) remain compatibility shims and accept:
   - `JANSSON_IMPLEMENTATION=original|safe`
   - `JANSSON_TEST_MODE=build|runtime|all`
 - `JANSSON_IMPLEMENTATION=safe JANSSON_TEST_MODE=runtime ./test-original.sh` verifies real installed binaries and plugins against the safe package, asserts that each exercised binary resolves `libjansson.so.4` from the selected installation, and then runs smoke tests for:
@@ -44,21 +45,26 @@ This document is the authoritative compatibility contract for the safe port as a
   - `jose`
   - `jshon`
   - `mtr`
+  - `nghttp2-client` using `nghttp2-server` only as the local fixture
   - `suricata`
   - `tang`
   - `teamd` / `teamdctl`
   - `ulogd2-json`
   - `wayvnc` / `wayvncctl`
   - `webdis`
+- The `nghttp2-client` runtime check starts `nghttpd`, requests a local resource with `nghttp --har=...`, verifies that the HAR output parses as JSON with a top-level `log` object, and also asserts that the exercised `nghttp` binary resolves the selected `libjansson.so.4`.
 - The ulogd JSON plugin check resolves the installed plugin path from package contents instead of hard-coding an architecture path.
+- Every downstream runtime/build run writes raw logs under `safe/.build/dependent-matrix/<implementation>/<mode>/<application>/...` and updates the checked-in issue inventory at [`safe/tests/regressions/discovered-issues.md`](/home/yans/safelibs/port-libjansson/safe/tests/regressions/discovered-issues.md).
 
 ## Prepared Image Compatibility
 
 - [`safe/docker/dependent-matrix.Dockerfile`](/home/yans/safelibs/port-libjansson/safe/docker/dependent-matrix.Dockerfile) is the reusable Ubuntu 24.04 scaffold for the downstream dependent matrix.
 - [`safe/scripts/build-dependent-image.sh`](/home/yans/safelibs/port-libjansson/safe/scripts/build-dependent-image.sh) resolves the primary application binaries directly from [`dependents.json`](/home/yans/safelibs/port-libjansson/dependents.json), so the checked-in manifest remains the authoritative source of truth for the counted matrix.
+- [`safe/scripts/run-dependent-image-tests.sh`](/home/yans/safelibs/port-libjansson/safe/scripts/run-dependent-image-tests.sh) is the prepared-image execution entrypoint used by the phase verifier. It mounts the repository into the prepared image and invokes the shared in-container harness instead of maintaining a second copy of the smoke/build logic.
 - The prepared image installs the union of build/runtime prerequisites currently encoded in [`test-original.sh`](/home/yans/safelibs/port-libjansson/test-original.sh), the 12 primary manifest binaries, and only the extra helper binaries required to exercise a manifest entry. Today that extra helper is `nghttp2-server` for the `nghttp2-client` entry.
 - In safe mode the image builder reuses any preexisting `safe/dist/libjansson4_*.deb` and `safe/dist/libjansson-dev_*.deb` artifacts, and only invokes [`safe/scripts/build-deb.sh`](/home/yans/safelibs/port-libjansson/safe/scripts/build-deb.sh) when those Debian packages are missing.
 - The prepared-image path always installs `libjansson4` and `libjansson-dev` through Debian packages, so the image consumes the same package artifacts that the rest of the verification workflow exercises.
+- Prepared-image runs persist deterministic logs under `safe/.build/dependent-matrix/<implementation>/<mode>/...` and write or update stable `APP-*` entries in [`safe/tests/regressions/discovered-issues.md`](/home/yans/safelibs/port-libjansson/safe/tests/regressions/discovered-issues.md).
 
 ## Downstream Build Compatibility
 
@@ -84,6 +90,7 @@ This document is the authoritative compatibility contract for the safe port as a
   - `apt-get build-dep -y "$srcpkg"`
   - `DEB_BUILD_OPTIONS=nocheck dpkg-buildpackage -B -uc -us`
 - The Emacs special case keeps `EMACS_INHIBIT_NATIVE_COMPILATION=1` during `dpkg-buildpackage` so native-compilation artifacts do not obscure the libjansson dependency edge being verified.
+- Build-stage failures are collected per package under `safe/.build/dependent-matrix/<implementation>/build/<source-package>/...` so the issue inventory can point to deterministic logs without stopping at the first package failure.
 
 ## Packaging Compatibility
 
