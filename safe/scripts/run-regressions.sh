@@ -9,7 +9,7 @@ CASE_FILTER=
 
 usage() {
   cat <<'EOF' >&2
-Usage: safe/scripts/run-regressions.sh [--mode pre-fix|post-fix] [--pre-fix] [--post-fix] [--manifest PATH] [--case SUBSTRING]
+Usage: safe/scripts/run-regressions.sh [--mode pre-fix|post-fix] [--pre-fix] [--post-fix] [--respect-status-before-fix] [--manifest PATH] [--case SUBSTRING]
 EOF
   exit 2
 }
@@ -27,6 +27,10 @@ while [ "$#" -gt 0 ]; do
       ;;
     --post-fix)
       MODE="post-fix"
+      shift
+      ;;
+    --respect-status-before-fix)
+      MODE="pre-fix"
       shift
       ;;
     --manifest)
@@ -93,9 +97,13 @@ if not manifest_path.is_file():
 if not issue_file.is_file():
     fail(f"missing discovered-issues file: {issue_file}")
 
-cases = json.loads(manifest_path.read_text(encoding="utf-8"))
+manifest_data = json.loads(manifest_path.read_text(encoding="utf-8"))
+if not isinstance(manifest_data, dict):
+    fail("manifest must be a JSON object")
+
+cases = manifest_data.get("cases")
 if not isinstance(cases, list):
-    fail("manifest must be a JSON array")
+    fail("manifest must contain a cases array")
 
 normalized_cases = []
 for index, case in enumerate(cases):
