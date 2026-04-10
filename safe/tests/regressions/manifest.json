@@ -3,12 +3,14 @@
     {
       "runner": "image",
       "path": "safe/tests/regressions/cases/nghttp2-image-selected-libjansson-resolution.sh",
-      "status_before_fix": "passing"
+      "status_before_fix": "passing",
+      "status_after_fix": "passing"
     },
     {
       "runner": "image",
       "path": "safe/tests/regressions/cases/nghttp2-image-har-json-structure.sh",
-      "status_before_fix": "passing"
+      "status_before_fix": "passing",
+      "status_after_fix": "passing"
     }
   ]
 }
