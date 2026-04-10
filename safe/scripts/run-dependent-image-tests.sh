@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-DOCKER_IMAGE="${DOCKER_IMAGE:-ubuntu:24.04}"
+DOCKER_IMAGE="${DOCKER_IMAGE:-}"
 JANSSON_IMPLEMENTATION="${JANSSON_IMPLEMENTATION:-original}"
 JANSSON_TEST_MODE="${JANSSON_TEST_MODE:-runtime}"
 JANSSON_RUNTIME_APPLICATIONS="${JANSSON_RUNTIME_APPLICATIONS:-}"
@@ -13,7 +13,7 @@ DEPENDENT_MATRIX_ISSUE_FILE="${DEPENDENT_MATRIX_ISSUE_FILE:-}"
 
 usage() {
   cat <<'EOF' >&2
-Usage: safe/scripts/run-dependent-image-tests.sh [--image IMAGE] [--implementation original|safe] [--mode build|runtime|all]
+Usage: safe/scripts/run-dependent-image-tests.sh [--image PREPARED_IMAGE] [--implementation original|safe] [--mode build|runtime|all]
 EOF
   exit 2
 }
@@ -65,8 +65,17 @@ case "${JANSSON_TEST_MODE}" in
     ;;
 esac
 
+if [ -z "${DOCKER_IMAGE}" ]; then
+  DOCKER_IMAGE="libjansson-dependent-matrix:${JANSSON_IMPLEMENTATION}"
+fi
+
 if ! command -v docker >/dev/null 2>&1; then
   fail "docker is required to run the dependent matrix"
+fi
+
+if ! docker image inspect "${DOCKER_IMAGE}" >/dev/null 2>&1; then
+  fail \
+    "Missing prepared image ${DOCKER_IMAGE}; build it with safe/scripts/build-dependent-image.sh --implementation ${JANSSON_IMPLEMENTATION} --tag ${DOCKER_IMAGE}"
 fi
 
 docker run --rm -i \

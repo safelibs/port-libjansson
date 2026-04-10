@@ -297,13 +297,16 @@ build_command_for() {
   local srcdir="$1"
   local srcpkg="$2"
   local command
+  local build_options="nocheck nostrip noautodbgsym"
 
   case "${srcpkg}" in
     emacs)
-      printf -v command 'cd %q && EMACS_INHIBIT_NATIVE_COMPILATION=1 DEB_BUILD_OPTIONS=nocheck dpkg-buildpackage -B -uc -us' "${srcdir}"
+      printf -v command 'cd %q && EMACS_INHIBIT_NATIVE_COMPILATION=1 DEB_BUILD_OPTIONS=%q dpkg-buildpackage -B -uc -us' \
+        "${srcdir}" "${build_options}"
       ;;
     *)
-      printf -v command 'cd %q && DEB_BUILD_OPTIONS=nocheck dpkg-buildpackage -B -uc -us' "${srcdir}"
+      printf -v command 'cd %q && DEB_BUILD_OPTIONS=%q dpkg-buildpackage -B -uc -us' \
+        "${srcdir}" "${build_options}"
       ;;
   esac
 

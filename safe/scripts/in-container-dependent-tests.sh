@@ -1459,10 +1459,12 @@ else:
 lines.append(f"- Log roots: {', '.join(log_roots) if log_roots else 'none'}")
 lines.append("")
 
-if not merged:
+open_issue_ids = [issue_id for issue_id in sorted(merged) if merged[issue_id].get("current_status") == "open"]
+
+if not open_issue_ids:
     lines.append("No application-level regressions found.")
 else:
-    for issue_id in sorted(merged):
+    for issue_id in open_issue_ids:
         entry = merged[issue_id]
         metadata = {
             "phase": entry.get("phase", ""),

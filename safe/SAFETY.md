@@ -9,6 +9,29 @@
 
 Everything else, including parser state transitions, dump formatting decisions, hash selection, and most error handling logic, stays in safe Rust.
 
+## Audit Contract
+
+The final verifier runs `rg -n '\bunsafe\b|extern "C"|no_mangle' safe/src safe/csrc` and then requires every Rust file reported by that audit to remain documented here. The current residual Rust audit file set is:
+
+- `safe/src/abi.rs`
+- `safe/src/array.rs`
+- `safe/src/dump.rs`
+- `safe/src/error.rs`
+- `safe/src/load.rs`
+- `safe/src/object.rs`
+- `safe/src/pack.rs`
+- `safe/src/raw/alloc.rs`
+- `safe/src/raw/buf.rs`
+- `safe/src/raw/list.rs`
+- `safe/src/raw/table.rs`
+- `safe/src/scalar.rs`
+- `safe/src/strconv.rs`
+- `safe/src/unpack.rs`
+- `safe/src/utf.rs`
+- `safe/src/version.rs`
+
+The two checked-in C shims are part of the residual surface as well and are documented separately below, even though they are not selected by the Rust-oriented `rg` pattern.
+
 ## Residual C Boundaries
 
 ### `safe/csrc/pack_unpack_shim.c`
@@ -116,6 +139,7 @@ No other checked-in C sources remain.
 
 ### `safe/src/version.rs`
 
+- This file appears in the final audit because it exports `#[no_mangle] extern "C"` version entrypoints.
 - No unsafe code remains.
 
 ## Final Constraints
